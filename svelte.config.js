@@ -15,7 +15,7 @@ const config = {
 			// default options are suitable for GitHub Pages, but specify pages/assets
 			pages: 'docs', // Output directory for GitHub Pages
 			assets: 'docs', // Assets directory (usually same as pages)
-			fallback: undefined, // No fallback needed for pure SPA on GitHub Pages
+			fallback: 'index.html', // Add SPA fallback for GitHub Pages
 			precompress: false,
 			strict: true
 		}),
