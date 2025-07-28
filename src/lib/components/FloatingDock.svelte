@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import ProfessionalHSLPicker from './ProfessionalHSLPicker.svelte';
+	import TimerSettings from './TimerSettings.svelte';
 
 	let dockElement: HTMLDivElement;
 	let isVisible = false;
@@ -8,6 +9,7 @@
 	let mouseY = 0;
 	let windowHeight = 0;
 	let showColorGrid = false;
+	let showTimerSettings = false;
 
 	const TRIGGER_ZONE_HEIGHT = 100; // pixels from bottom to trigger
 	const AUTO_HIDE_DELAY = 3000; // ms before auto-hide
@@ -71,8 +73,17 @@
 
 	function toggleColorGrid() {
 		showColorGrid = !showColorGrid;
+		showTimerSettings = false;
 		if (showColorGrid) {
 			showDock(); // Keep dock visible when grid is open
+		}
+	}
+
+	function toggleTimerSettings() {
+		showTimerSettings = !showTimerSettings;
+		showColorGrid = false;
+		if (showTimerSettings) {
+			showDock(); // Keep dock visible when settings are open
 		}
 	}
 
@@ -80,6 +91,9 @@
 		switch (item) {
 			case 'colors':
 				toggleColorGrid();
+				break;
+			case 'timer':
+				toggleTimerSettings();
 				break;
 			default:
 				// Handle other dock items
@@ -118,6 +132,14 @@
 		<div class="dock-item" title="Particle Effects">
 			<div class="dock-icon">💫</div>
 		</div>
+		<div 
+			class="dock-item"
+			class:active={showTimerSettings}
+			title="Timer Settings"
+			on:click={() => handleDockItemClick('timer')}
+		>
+			<div class="dock-icon">⏱️</div>
+		</div>
 		<div class="dock-item" title="Settings">
 			<div class="dock-icon">⚙️</div>
 		</div>
@@ -126,10 +148,20 @@
 	<!-- Color Grid Panel -->
 	{#if showColorGrid}
 		<div 
-			class="color-grid-panel"
+			class="panel-container color-grid-panel"
 			class:visible={showColorGrid}
 		>
 			<ProfessionalHSLPicker />
+		</div>
+	{/if}
+
+	<!-- Timer Settings Panel -->
+	{#if showTimerSettings}
+		<div 
+			class="panel-container timer-settings-panel"
+			class:visible={showTimerSettings}
+		>
+			<TimerSettings />
 		</div>
 	{/if}
 </div>
@@ -252,8 +284,8 @@
 		z-index: -1;
 	}
 
-	/* Color Grid Panel */
-	.color-grid-panel {
+	/* Panel Container - shared styles for all panels */
+	.panel-container {
 		position: absolute;
 		bottom: 80px;
 		left: 50%;
@@ -266,7 +298,7 @@
 		z-index: 999;
 	}
 
-	.color-grid-panel.visible {
+	.panel-container.visible {
 		transform: translateX(-50%) translateY(0);
 		opacity: 1;
 		pointer-events: auto;
