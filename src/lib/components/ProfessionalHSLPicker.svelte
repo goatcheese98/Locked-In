@@ -92,16 +92,18 @@
 
 		animationTime += 0.016; // ~60fps
 
-		// Immediate movement when dragging, smooth when not
-		const smoothFactor = isDragging ? 1.0 : 0.15;
-		
-		// Update all indicator positions
-		hueIndicator1.x += (hueIndicator1.targetX - hueIndicator1.x) * smoothFactor;
-		hueIndicator2.x += (hueIndicator2.targetX - hueIndicator2.x) * smoothFactor;
-		satIndicator1.x += (satIndicator1.targetX - satIndicator1.x) * smoothFactor;
-		satIndicator2.x += (satIndicator2.targetX - satIndicator2.x) * smoothFactor;
-		lightIndicator1.x += (lightIndicator1.targetX - lightIndicator1.x) * smoothFactor;
-		lightIndicator2.x += (lightIndicator2.targetX - lightIndicator2.x) * smoothFactor;
+		// Skip smoothing during drag - positions are already set in handleGlobalMouseMove
+		if (!isDragging) {
+			const smoothFactor = 0.15;
+			
+			// Update all indicator positions with smoothing
+			hueIndicator1.x += (hueIndicator1.targetX - hueIndicator1.x) * smoothFactor;
+			hueIndicator2.x += (hueIndicator2.targetX - hueIndicator2.x) * smoothFactor;
+			satIndicator1.x += (satIndicator1.targetX - satIndicator1.x) * smoothFactor;
+			satIndicator2.x += (satIndicator2.targetX - satIndicator2.x) * smoothFactor;
+			lightIndicator1.x += (lightIndicator1.targetX - lightIndicator1.x) * smoothFactor;
+			lightIndicator2.x += (lightIndicator2.targetX - lightIndicator2.x) * smoothFactor;
+		}
 
 		// Animate scales and opacity based on interaction
 		const indicators = [hueIndicator1, hueIndicator2, satIndicator1, satIndicator2, lightIndicator1, lightIndicator2];
@@ -330,16 +332,23 @@
 		if (!isDragging || !activeSlider || !activeGradient) return;
 
 		let canvasRef: HTMLCanvasElement;
+		let indicator1: any, indicator2: any;
 
 		switch (activeSlider) {
 			case 'hue':
 				canvasRef = hueCanvasRef;
+				indicator1 = hueIndicator1;
+				indicator2 = hueIndicator2;
 				break;
 			case 'saturation':
 				canvasRef = satCanvasRef;
+				indicator1 = satIndicator1;
+				indicator2 = satIndicator2;
 				break;
 			case 'lightness':
 				canvasRef = lightCanvasRef;
+				indicator1 = lightIndicator1;
+				indicator2 = lightIndicator2;
 				break;
 			default:
 				return;
@@ -350,6 +359,15 @@
 		const rect = canvasRef.getBoundingClientRect();
 		const x = event.clientX - rect.left;
 		const constrainedX = Math.max(SLIDER_MARGIN, Math.min(SLIDER_WIDTH - SLIDER_MARGIN, x));
+		
+		// Update the indicator position immediately
+		if (activeGradient === 1) {
+			indicator1.targetX = constrainedX;
+			indicator1.x = constrainedX; // Immediate update for dragging
+		} else {
+			indicator2.targetX = constrainedX;
+			indicator2.x = constrainedX; // Immediate update for dragging
+		}
 		
 		const newValue = sliderPositionToValue(constrainedX, activeSlider);
 		updateColorValue(activeSlider, newValue, activeGradient);
@@ -385,8 +403,12 @@
 
 		if (gradientNumber === 1) {
 			setGradientColor1(newH, newS, newL);
+			// Update local reactive variable to trigger updates
+			color1HSL = { h: newH, s: newS, l: newL };
 		} else {
 			setGradientColor2(newH, newS, newL);
+			// Update local reactive variable to trigger updates
+			color2HSL = { h: newH, s: newS, l: newL };
 		}
 	}
 
@@ -433,7 +455,10 @@
 		
 		// Subscribe to background settings for real-time updates
 		unsubscribe = backgroundSettings.subscribe((settings) => {
-			// Update colors will trigger reactive statements
+			// Directly update positions when store changes
+			if (settings.gradientColor1 || settings.gradientColor2) {
+				updateIndicatorPositions();
+			}
 		});
 
 		return () => {
