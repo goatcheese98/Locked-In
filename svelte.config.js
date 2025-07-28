@@ -20,7 +20,7 @@ const config = {
 			strict: true
 		}),
 		paths: {
-			base: process.env.NODE_ENV === 'production' ? '/Locked-In' : '', // Set base path for GitHub Pages
+			base: process.env.NODE_ENV === 'production' ? '/Locked-In' : '' // Set base path for GitHub Pages
 		}
 	}
 };

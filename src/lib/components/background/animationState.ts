@@ -1,12 +1,22 @@
 /**
  * animationState.ts
- * 
- * This module centralizes the state management for all animated objects in the 
+ *
+ * This module centralizes the state management for all animated objects in the
  * interactive background. It handles the creation, storage, retrieval, and pooling
  * of objects like ripples, glints, shimmer spots, etc., to optimize performance
  * by reducing garbage collection.
  */
-import type { Ripple, ShimmerSpot, Glint, SunGlow, SunGlint, RareSighting, WaterGrain, FoamStreak, FoamParticle } from './types';
+import type {
+	Ripple,
+	ShimmerSpot,
+	Glint,
+	SunGlow,
+	SunGlint,
+	RareSighting,
+	WaterGrain,
+	FoamStreak,
+	FoamParticle
+} from './types';
 
 // --- ID Counters ---
 // These counters ensure unique IDs for each new or reused animation object.
@@ -70,29 +80,29 @@ export const getFoamStreaks = (): FoamStreak[] => activeFoamStreaks;
  * @param props - Properties for the ripple, excluding the 'id'.
  */
 export function addRipple(props: Omit<Ripple, 'id'>): void {
-    let ripple: Ripple | undefined = inactiveRipples.pop(); // Try to get from pool
+	let ripple: Ripple | undefined = inactiveRipples.pop(); // Try to get from pool
 
-    if (ripple) {
-        // Reset properties of the reused ripple
-        ripple.x = props.x;
-        ripple.y = props.y;
-        ripple.radius = props.radius;
-        ripple.maxRadius = props.maxRadius;
-        ripple.opacity = props.opacity;
-        ripple.speed = props.speed;
-        ripple.lineWidth = props.lineWidth;
-        ripple.color = props.color;
-        ripple.isAmbient = props.isAmbient;
-        ripple.decayRate = props.decayRate;
-        ripple.id = rippleIdCounter++; // Assign new ID
-    } else {
-        // Pool was empty, create a new ripple object
-        ripple = {
-            ...props,
-            id: rippleIdCounter++
-        };
-    }
-    activeRipples.push(ripple);
+	if (ripple) {
+		// Reset properties of the reused ripple
+		ripple.x = props.x;
+		ripple.y = props.y;
+		ripple.radius = props.radius;
+		ripple.maxRadius = props.maxRadius;
+		ripple.opacity = props.opacity;
+		ripple.speed = props.speed;
+		ripple.lineWidth = props.lineWidth;
+		ripple.color = props.color;
+		ripple.isAmbient = props.isAmbient;
+		ripple.decayRate = props.decayRate;
+		ripple.id = rippleIdCounter++; // Assign new ID
+	} else {
+		// Pool was empty, create a new ripple object
+		ripple = {
+			...props,
+			id: rippleIdCounter++
+		};
+	}
+	activeRipples.push(ripple);
 }
 
 /**
@@ -101,35 +111,35 @@ export function addRipple(props: Omit<Ripple, 'id'>): void {
  * @param props - Properties for the shimmer spot, excluding the 'id'.
  */
 export function addShimmerSpot(props: Omit<ShimmerSpot, 'id'>): void {
-    let spot: ShimmerSpot | undefined = inactiveShimmerSpots.pop();
+	let spot: ShimmerSpot | undefined = inactiveShimmerSpots.pop();
 
-    if (spot) {
-        // Reset all properties of the reused spot
-        spot.x = props.x;
-        spot.y = props.y;
-        spot.radius = props.radius;
-        spot.currentMaxRadius = props.currentMaxRadius;
-        spot.opacity = props.opacity;
-        spot.growthSpeed = props.growthSpeed;
-        spot.opacitySpeed = props.opacitySpeed;
-        spot.color = props.color;
-        spot.vx = props.vx;
-        spot.vy = props.vy;
-        spot.isWave = props.isWave;
-        // Reset resize-related properties
-        spot.relativeXInSpawn = props.relativeXInSpawn;
-        spot.relativeYInSpawn = props.relativeYInSpawn;
-        spot.baseVx = props.baseVx;
-        spot.baseVy = props.baseVy;
-        spot.id = shimmerSpotIdCounter++; // Assign new ID
-    } else {
-        // Pool was empty, create a new spot object
-        spot = {
-            ...props,
-            id: shimmerSpotIdCounter++
-        };
-    }
-    activeShimmerSpots.push(spot);
+	if (spot) {
+		// Reset all properties of the reused spot
+		spot.x = props.x;
+		spot.y = props.y;
+		spot.radius = props.radius;
+		spot.currentMaxRadius = props.currentMaxRadius;
+		spot.opacity = props.opacity;
+		spot.growthSpeed = props.growthSpeed;
+		spot.opacitySpeed = props.opacitySpeed;
+		spot.color = props.color;
+		spot.vx = props.vx;
+		spot.vy = props.vy;
+		spot.isWave = props.isWave;
+		// Reset resize-related properties
+		spot.relativeXInSpawn = props.relativeXInSpawn;
+		spot.relativeYInSpawn = props.relativeYInSpawn;
+		spot.baseVx = props.baseVx;
+		spot.baseVy = props.baseVy;
+		spot.id = shimmerSpotIdCounter++; // Assign new ID
+	} else {
+		// Pool was empty, create a new spot object
+		spot = {
+			...props,
+			id: shimmerSpotIdCounter++
+		};
+	}
+	activeShimmerSpots.push(spot);
 }
 
 /**
@@ -137,23 +147,23 @@ export function addShimmerSpot(props: Omit<ShimmerSpot, 'id'>): void {
  * @param props - Properties for the glint, excluding the 'id'.
  */
 export function addGlint(props: Omit<Glint, 'id'>): void {
-    let glint: Glint | undefined = inactiveGlints.pop();
+	let glint: Glint | undefined = inactiveGlints.pop();
 
-    if (glint) {
-        glint.x = props.x;
-        glint.y = props.y;
-        glint.radius = props.radius;
-        glint.opacity = props.opacity;
-        glint.decay = props.decay;
-        glint.color = props.color;
-        glint.id = glintIdCounter++;
-    } else {
-        glint = {
-            ...props,
-            id: glintIdCounter++
-        };
-    }
-    activeGlints.push(glint);
+	if (glint) {
+		glint.x = props.x;
+		glint.y = props.y;
+		glint.radius = props.radius;
+		glint.opacity = props.opacity;
+		glint.decay = props.decay;
+		glint.color = props.color;
+		glint.id = glintIdCounter++;
+	} else {
+		glint = {
+			...props,
+			id: glintIdCounter++
+		};
+	}
+	activeGlints.push(glint);
 }
 
 /**
@@ -162,8 +172,8 @@ export function addGlint(props: Omit<Glint, 'id'>): void {
  * @param props - Properties for the sun glow, excluding the 'id'.
  */
 export const addSunGlow = (props: Omit<SunGlow, 'id'>): void => {
-    activeSunGlows.push({ ...props, id: sunGlowIdCounter++ });
-    // TODO: Consider pooling if multiple SunGlows with lifecycles are introduced.
+	activeSunGlows.push({ ...props, id: sunGlowIdCounter++ });
+	// TODO: Consider pooling if multiple SunGlows with lifecycles are introduced.
 };
 
 /**
@@ -171,23 +181,23 @@ export const addSunGlow = (props: Omit<SunGlow, 'id'>): void => {
  * @param props - Properties for the sun glint, excluding the 'id'.
  */
 export function addSunGlint(props: Omit<SunGlint, 'id'>): void {
-    let sunGlint: SunGlint | undefined = inactiveSunGlints.pop();
+	let sunGlint: SunGlint | undefined = inactiveSunGlints.pop();
 
-    if (sunGlint) {
-        sunGlint.x = props.x;
-        sunGlint.y = props.y;
-        sunGlint.radius = props.radius;
-        sunGlint.opacity = props.opacity;
-        sunGlint.decay = props.decay;
-        sunGlint.color = props.color;
-        sunGlint.id = sunGlintIdCounter++;
-    } else {
-        sunGlint = {
-            ...props,
-            id: sunGlintIdCounter++
-        };
-    }
-    activeSunGlints.push(sunGlint);
+	if (sunGlint) {
+		sunGlint.x = props.x;
+		sunGlint.y = props.y;
+		sunGlint.radius = props.radius;
+		sunGlint.opacity = props.opacity;
+		sunGlint.decay = props.decay;
+		sunGlint.color = props.color;
+		sunGlint.id = sunGlintIdCounter++;
+	} else {
+		sunGlint = {
+			...props,
+			id: sunGlintIdCounter++
+		};
+	}
+	activeSunGlints.push(sunGlint);
 }
 
 /**
@@ -196,47 +206,47 @@ export function addSunGlint(props: Omit<SunGlint, 'id'>): void {
  * @param props - Properties for the rare sighting, excluding the 'id'.
  */
 export function addRareSighting(props: Omit<RareSighting, 'id'>): void {
-    let sighting: RareSighting | undefined = inactiveRareSightings.pop();
+	let sighting: RareSighting | undefined = inactiveRareSightings.pop();
 
-    if (sighting) {
-        // Reset common properties
-        sighting.type = props.type;
-        sighting.x = props.x;
-        sighting.y = props.y;
-        sighting.vx = props.vx;
-        sighting.vy = props.vy;
-        sighting.size = props.size;
-        sighting.opacity = props.opacity;
-        sighting.age = 0; // Crucial: Reset age for reused objects
-        sighting.maxAge = props.maxAge;
-        
-        // Reset type-specific properties for 'whaleShadow' if applicable,
-        // and clear them if the reused object was a different type or props are not provided.
-        if (props.type === 'whaleShadow') {
-            sighting.bodyAngle = props.bodyAngle ?? 0;
-            sighting.bodyAngleSpeed = props.bodyAngleSpeed;
-            sighting.bodyAngleAmplitude = props.bodyAngleAmplitude;
-            sighting.tailAngleOffset = props.tailAngleOffset ?? 0;
-            sighting.tailOscillationSpeed = props.tailOscillationSpeed;
-            sighting.tailOscillationAmplitude = props.tailOscillationAmplitude;
-        } else {
-            // Ensure properties specific to other types are cleared if reusing
-            delete sighting.bodyAngle;
-            delete sighting.bodyAngleSpeed;
-            delete sighting.bodyAngleAmplitude;
-            delete sighting.tailAngleOffset;
-            delete sighting.tailOscillationSpeed;
-            delete sighting.tailOscillationAmplitude;
-        }
-        sighting.id = rareSightingIdCounter++;
-    } else {
-        sighting = {
-            ...props,
-            age: 0, // Ensure age starts at 0 for new objects too
-            id: rareSightingIdCounter++
-        };
-    }
-    activeRareSightings.push(sighting);
+	if (sighting) {
+		// Reset common properties
+		sighting.type = props.type;
+		sighting.x = props.x;
+		sighting.y = props.y;
+		sighting.vx = props.vx;
+		sighting.vy = props.vy;
+		sighting.size = props.size;
+		sighting.opacity = props.opacity;
+		sighting.age = 0; // Crucial: Reset age for reused objects
+		sighting.maxAge = props.maxAge;
+
+		// Reset type-specific properties for 'whaleShadow' if applicable,
+		// and clear them if the reused object was a different type or props are not provided.
+		if (props.type === 'whaleShadow') {
+			sighting.bodyAngle = props.bodyAngle ?? 0;
+			sighting.bodyAngleSpeed = props.bodyAngleSpeed;
+			sighting.bodyAngleAmplitude = props.bodyAngleAmplitude;
+			sighting.tailAngleOffset = props.tailAngleOffset ?? 0;
+			sighting.tailOscillationSpeed = props.tailOscillationSpeed;
+			sighting.tailOscillationAmplitude = props.tailOscillationAmplitude;
+		} else {
+			// Ensure properties specific to other types are cleared if reusing
+			delete sighting.bodyAngle;
+			delete sighting.bodyAngleSpeed;
+			delete sighting.bodyAngleAmplitude;
+			delete sighting.tailAngleOffset;
+			delete sighting.tailOscillationSpeed;
+			delete sighting.tailOscillationAmplitude;
+		}
+		sighting.id = rareSightingIdCounter++;
+	} else {
+		sighting = {
+			...props,
+			age: 0, // Ensure age starts at 0 for new objects too
+			id: rareSightingIdCounter++
+		};
+	}
+	activeRareSightings.push(sighting);
 }
 
 /**
@@ -245,8 +255,8 @@ export function addRareSighting(props: Omit<RareSighting, 'id'>): void {
  * @param props - Properties for the water grain, excluding the 'id'.
  */
 export const addWaterGrain = (props: Omit<WaterGrain, 'id'>): void => {
-    activeWaterGrains.push({ ...props, id: waterGrainIdCounter++ });
-    // TODO: Implement pooling for WaterGrains if their creation/destruction becomes frequent or costly.
+	activeWaterGrains.push({ ...props, id: waterGrainIdCounter++ });
+	// TODO: Implement pooling for WaterGrains if their creation/destruction becomes frequent or costly.
 };
 
 /**
@@ -255,67 +265,67 @@ export const addWaterGrain = (props: Omit<WaterGrain, 'id'>): void => {
  * @param props - Properties for the foam streak, excluding the 'id'.
  */
 export function addFoamStreak(props: Omit<FoamStreak, 'id'>): void {
-    let streak: FoamStreak | undefined = inactiveFoamStreaks.pop();
+	let streak: FoamStreak | undefined = inactiveFoamStreaks.pop();
 
-    if (streak) {
-        // Reset properties for reused streak
-        streak.anchorX = props.anchorX;
-        streak.anchorY = props.anchorY;
-        // Deep copy/reset particles is crucial to avoid reusing old particle states.
-        // A dedicated particle pool could further optimize this.
-        streak.particles = []; 
-        streak.vx = props.vx;
-        streak.vy = props.vy;
-        streak.opacity = 0; // Streaks typically fade in
-        streak.age = 0;     // Reset age
-        streak.maxAge = props.maxAge;
-        streak.color = props.color;
-        streak.id = foamStreakIdCounter++;
-    } else {
-        streak = {
-            ...props,
-            particles: [], 
-            opacity: 0, // Start invisible, to be faded in
-            age: 0,
-            id: foamStreakIdCounter++
-        };
-    }
-    activeFoamStreaks.push(streak);
+	if (streak) {
+		// Reset properties for reused streak
+		streak.anchorX = props.anchorX;
+		streak.anchorY = props.anchorY;
+		// Deep copy/reset particles is crucial to avoid reusing old particle states.
+		// A dedicated particle pool could further optimize this.
+		streak.particles = [];
+		streak.vx = props.vx;
+		streak.vy = props.vy;
+		streak.opacity = 0; // Streaks typically fade in
+		streak.age = 0; // Reset age
+		streak.maxAge = props.maxAge;
+		streak.color = props.color;
+		streak.id = foamStreakIdCounter++;
+	} else {
+		streak = {
+			...props,
+			particles: [],
+			opacity: 0, // Start invisible, to be faded in
+			age: 0,
+			id: foamStreakIdCounter++
+		};
+	}
+	activeFoamStreaks.push(streak);
 }
 
 /**
  * Adds a new foam particle or reuses one from the inactive pool.
  * IMPORTANT: This function MODIFIES the passed-in `streak` object by adding the particle to its `particles` array.
- * 
+ *
  * @param streak - The FoamStreak object to add the particle to.
  * @param props - Properties for the foam particle.
  */
 export function addFoamParticle(streak: FoamStreak, props: FoamParticle): void {
-    let particle: FoamParticle | undefined = inactiveFoamParticles.pop();
+	let particle: FoamParticle | undefined = inactiveFoamParticles.pop();
 
-    if (particle) {
-        // Reset properties of the reused particle
-        particle.x = props.x;
-        particle.y = props.y;
-        particle.size = props.size;
-        particle.opacity = 0; // Start invisible
-        particle.initialRelativeX = props.initialRelativeX;
-        particle.initialRelativeY = props.initialRelativeY;
-        particle.appearAtAge = props.appearAtAge;
-        particle.maxOpacity = props.maxOpacity;
-        particle.particleAge = 0; // Reset age
-        particle.particleMaxAge = props.particleMaxAge;
-    } else {
-        // Pool was empty, create a new particle object
-        // Use the passed-in props directly, ensuring age/opacity are reset
-        particle = {
-            ...props,
-            opacity: 0,
-            particleAge: 0
-        };
-    }
-    // Add the particle to the specific streak it belongs to
-    streak.particles.push(particle);
+	if (particle) {
+		// Reset properties of the reused particle
+		particle.x = props.x;
+		particle.y = props.y;
+		particle.size = props.size;
+		particle.opacity = 0; // Start invisible
+		particle.initialRelativeX = props.initialRelativeX;
+		particle.initialRelativeY = props.initialRelativeY;
+		particle.appearAtAge = props.appearAtAge;
+		particle.maxOpacity = props.maxOpacity;
+		particle.particleAge = 0; // Reset age
+		particle.particleMaxAge = props.particleMaxAge;
+	} else {
+		// Pool was empty, create a new particle object
+		// Use the passed-in props directly, ensuring age/opacity are reset
+		particle = {
+			...props,
+			opacity: 0,
+			particleAge: 0
+		};
+	}
+	// Add the particle to the specific streak it belongs to
+	streak.particles.push(particle);
 }
 
 // --- Releasers / Deactivators ---
@@ -326,17 +336,19 @@ export function addFoamParticle(streak: FoamStreak, props: FoamParticle): void {
  * @param rippleToRelease - The ripple object to release.
  */
 export function releaseRipple(rippleToRelease: Ripple): void {
-    const index = activeRipples.findIndex(r => r.id === rippleToRelease.id);
-    if (index !== -1) {
-        const releasedRipple = activeRipples.splice(index, 1)[0];
-        if (releasedRipple) {
-            // Optional: Reset any specific properties here before pooling if necessary
-            // e.g., releasedRipple.someVolatileProperty = null;
-            inactiveRipples.push(releasedRipple);
-        }
-    } else {
-        console.warn(`Attempted to release ripple with ID ${rippleToRelease.id} not found in active list.`);
-    }
+	const index = activeRipples.findIndex((r) => r.id === rippleToRelease.id);
+	if (index !== -1) {
+		const releasedRipple = activeRipples.splice(index, 1)[0];
+		if (releasedRipple) {
+			// Optional: Reset any specific properties here before pooling if necessary
+			// e.g., releasedRipple.someVolatileProperty = null;
+			inactiveRipples.push(releasedRipple);
+		}
+	} else {
+		console.warn(
+			`Attempted to release ripple with ID ${rippleToRelease.id} not found in active list.`
+		);
+	}
 }
 
 /**
@@ -344,16 +356,18 @@ export function releaseRipple(rippleToRelease: Ripple): void {
  * @param spotToRelease - The shimmer spot object to release.
  */
 export function releaseShimmerSpot(spotToRelease: ShimmerSpot): void {
-    const index = activeShimmerSpots.findIndex(s => s.id === spotToRelease.id);
-    if (index !== -1) {
-        const releasedSpot = activeShimmerSpots.splice(index, 1)[0];
-        if (releasedSpot) {
-            // Optional: Reset any specific properties before pooling if needed
-            inactiveShimmerSpots.push(releasedSpot);
-        }
-    } else {
-        console.warn(`Attempted to release shimmerSpot with ID ${spotToRelease.id} not found in active list.`);
-    }
+	const index = activeShimmerSpots.findIndex((s) => s.id === spotToRelease.id);
+	if (index !== -1) {
+		const releasedSpot = activeShimmerSpots.splice(index, 1)[0];
+		if (releasedSpot) {
+			// Optional: Reset any specific properties before pooling if needed
+			inactiveShimmerSpots.push(releasedSpot);
+		}
+	} else {
+		console.warn(
+			`Attempted to release shimmerSpot with ID ${spotToRelease.id} not found in active list.`
+		);
+	}
 }
 
 /**
@@ -362,14 +376,14 @@ export function releaseShimmerSpot(spotToRelease: ShimmerSpot): void {
  * @returns The released shimmer spot object, or null if the active list was empty.
  */
 export function releaseOldestShimmerSpot(): ShimmerSpot | null {
-    if (activeShimmerSpots.length > 0) {
-        const oldestSpot = activeShimmerSpots.shift(); // Remove from the beginning
-        if (oldestSpot) {
-            inactiveShimmerSpots.push(oldestSpot); // Add to the inactive pool
-            return oldestSpot;
-        }
-    }
-    return null; // Return null if no spots were active
+	if (activeShimmerSpots.length > 0) {
+		const oldestSpot = activeShimmerSpots.shift(); // Remove from the beginning
+		if (oldestSpot) {
+			inactiveShimmerSpots.push(oldestSpot); // Add to the inactive pool
+			return oldestSpot;
+		}
+	}
+	return null; // Return null if no spots were active
 }
 
 /**
@@ -377,15 +391,17 @@ export function releaseOldestShimmerSpot(): ShimmerSpot | null {
  * @param glintToRelease - The glint object to release.
  */
 export function releaseGlint(glintToRelease: Glint): void {
-    const index = activeGlints.findIndex(g => g.id === glintToRelease.id);
-    if (index !== -1) {
-        const releasedGlint = activeGlints.splice(index, 1)[0];
-        if (releasedGlint) {
-            inactiveGlints.push(releasedGlint);
-        }
-    } else {
-        console.warn(`Attempted to release glint with ID ${glintToRelease.id} not found in active list.`);
-    }
+	const index = activeGlints.findIndex((g) => g.id === glintToRelease.id);
+	if (index !== -1) {
+		const releasedGlint = activeGlints.splice(index, 1)[0];
+		if (releasedGlint) {
+			inactiveGlints.push(releasedGlint);
+		}
+	} else {
+		console.warn(
+			`Attempted to release glint with ID ${glintToRelease.id} not found in active list.`
+		);
+	}
 }
 
 /**
@@ -393,15 +409,17 @@ export function releaseGlint(glintToRelease: Glint): void {
  * @param sunGlintToRelease - The sun glint object to release.
  */
 export function releaseSunGlint(sunGlintToRelease: SunGlint): void {
-    const index = activeSunGlints.findIndex(sg => sg.id === sunGlintToRelease.id);
-    if (index !== -1) {
-        const releasedSunGlint = activeSunGlints.splice(index, 1)[0];
-        if (releasedSunGlint) {
-            inactiveSunGlints.push(releasedSunGlint);
-        }
-    } else {
-        console.warn(`Attempted to release sunGlint with ID ${sunGlintToRelease.id} not found in active list.`);
-    }
+	const index = activeSunGlints.findIndex((sg) => sg.id === sunGlintToRelease.id);
+	if (index !== -1) {
+		const releasedSunGlint = activeSunGlints.splice(index, 1)[0];
+		if (releasedSunGlint) {
+			inactiveSunGlints.push(releasedSunGlint);
+		}
+	} else {
+		console.warn(
+			`Attempted to release sunGlint with ID ${sunGlintToRelease.id} not found in active list.`
+		);
+	}
 }
 
 /**
@@ -409,27 +427,29 @@ export function releaseSunGlint(sunGlintToRelease: SunGlint): void {
  * @param sightingToRelease - The rare sighting object to release.
  */
 export function releaseRareSighting(sightingToRelease: RareSighting): void {
-    const index = activeRareSightings.findIndex(s => s.id === sightingToRelease.id);
-    if (index !== -1) {
-        const releasedSighting = activeRareSightings.splice(index, 1)[0];
-        if (releasedSighting) {
-            inactiveRareSightings.push(releasedSighting);
-        }
-    } else {
-        console.warn(`Attempted to release rareSighting with ID ${sightingToRelease.id} not found in active list.`);
-    }
+	const index = activeRareSightings.findIndex((s) => s.id === sightingToRelease.id);
+	if (index !== -1) {
+		const releasedSighting = activeRareSightings.splice(index, 1)[0];
+		if (releasedSighting) {
+			inactiveRareSightings.push(releasedSighting);
+		}
+	} else {
+		console.warn(
+			`Attempted to release rareSighting with ID ${sightingToRelease.id} not found in active list.`
+		);
+	}
 }
 
 /**
  * Releases an active foam particle, moving it to the inactive pool for reuse.
  * Note: This does NOT remove the particle from its parent streak's array. That must be handled separately.
- * 
+ *
  * @param particleToRelease - The foam particle object to release.
  */
 export function releaseFoamParticle(particleToRelease: FoamParticle): void {
-    // Optional: Add checks or limits for the inactive pool size if needed.
-    // Reset any necessary properties before pooling, though addFoamParticle handles most resets.
-    inactiveFoamParticles.push(particleToRelease);
+	// Optional: Add checks or limits for the inactive pool size if needed.
+	// Reset any necessary properties before pooling, though addFoamParticle handles most resets.
+	inactiveFoamParticles.push(particleToRelease);
 }
 
 /**
@@ -438,25 +458,27 @@ export function releaseFoamParticle(particleToRelease: FoamParticle): void {
  * @param streakToRelease - The foam streak object to release.
  */
 export function releaseFoamStreak(streakToRelease: FoamStreak): void {
-    const index = activeFoamStreaks.findIndex(fs => fs.id === streakToRelease.id);
-    if (index !== -1) {
-        const releasedStreak = activeFoamStreaks.splice(index, 1)[0];
-        if (releasedStreak) {
-            // Release all associated particles back to their pool
-            for (const particle of releasedStreak.particles) {
-                releaseFoamParticle(particle);
-            }
-            // Clear the particles array on the streak object before pooling it
-            releasedStreak.particles = []; 
-            inactiveFoamStreaks.push(releasedStreak);
-        }
-    } else {
-        console.warn(`Attempted to release foamStreak with ID ${streakToRelease.id} not found in active list.`);
-    }
+	const index = activeFoamStreaks.findIndex((fs) => fs.id === streakToRelease.id);
+	if (index !== -1) {
+		const releasedStreak = activeFoamStreaks.splice(index, 1)[0];
+		if (releasedStreak) {
+			// Release all associated particles back to their pool
+			for (const particle of releasedStreak.particles) {
+				releaseFoamParticle(particle);
+			}
+			// Clear the particles array on the streak object before pooling it
+			releasedStreak.particles = [];
+			inactiveFoamStreaks.push(releasedStreak);
+		}
+	} else {
+		console.warn(
+			`Attempted to release foamStreak with ID ${streakToRelease.id} not found in active list.`
+		);
+	}
 }
 
 // Note: Direct array modification functions (like updateRipples, removeRippleById)
 // were considered but are currently avoided to enforce state changes through the
 // defined add/release patterns, which helps manage object pooling.
 // Effect modules should operate on the arrays returned by getters and use release functions
-// for removals, typically by iterating backwards through the arrays. 
+// for removals, typically by iterating backwards through the arrays.
