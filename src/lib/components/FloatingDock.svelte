@@ -6,7 +6,6 @@
 	import ParticleEffectsPanel from './ParticleEffectsPanel.svelte';
 	import LightEffectsPanel from './LightEffectsPanel.svelte';
 
-	let dockElement: HTMLDivElement;
 	let isVisible = false;
 	let hideTimeout: number;
 	let mouseY = 0;
@@ -18,7 +17,6 @@
 	let showParticleEffects = false;
 	let showMasterSettings = false;
 	let hoveredIndex = -1;
-	let dockItems: HTMLButtonElement[] = [];
 
 	const TRIGGER_ZONE_HEIGHT = 100; // pixels from bottom to trigger
 	const AUTO_HIDE_DELAY = 3000; // ms before auto-hide
@@ -46,11 +44,18 @@
 
 	function checkVisibility() {
 		const distanceFromBottom = windowHeight - mouseY;
-		const shouldShow = distanceFromBottom <= TRIGGER_ZONE_HEIGHT;
+		const isMouseAtBottom = distanceFromBottom <= TRIGGER_ZONE_HEIGHT;
+		const isPanelOpen =
+			showColorGrid ||
+			showTimerSettings ||
+			showWaterEffects ||
+			showLightEffects ||
+			showParticleEffects ||
+			showMasterSettings;
 
-		if (shouldShow && !isVisible) {
+		if (isMouseAtBottom || isPanelOpen) {
 			showDock();
-		} else if (!shouldShow && isVisible) {
+		} else {
 			scheduleHide();
 		}
 	}
@@ -64,7 +69,16 @@
 	}
 
 	function hideDock() {
-		isVisible = false;
+		if (
+			!showColorGrid &&
+			!showTimerSettings &&
+			!showWaterEffects &&
+			!showLightEffects &&
+			!showParticleEffects &&
+			!showMasterSettings
+		) {
+			isVisible = false;
+		}
 	}
 
 	function scheduleHide() {
@@ -87,67 +101,44 @@
 		showLightEffects = false;
 		showParticleEffects = false;
 		showMasterSettings = false;
+		checkVisibility();
 	}
 
-	function toggleColorGrid() {
+	function togglePanel(panel: string) {
+		const wasVisible = {
+			colors: showColorGrid,
+			timer: showTimerSettings,
+			water: showWaterEffects,
+			light: showLightEffects,
+			particles: showParticleEffects,
+			settings: showMasterSettings
+		}[panel];
+
 		closeAllPanels();
-		showColorGrid = true;
-		showDock();
-	}
 
-	function toggleTimerSettings() {
-		closeAllPanels();
-		showTimerSettings = true;
-		showDock();
-	}
-
-	function toggleWaterEffects() {
-		closeAllPanels();
-		showWaterEffects = true;
-		showDock();
-	}
-
-	function toggleLightEffects() {
-		closeAllPanels();
-		showLightEffects = true;
-		showDock();
-	}
-
-	function toggleParticleEffects() {
-		closeAllPanels();
-		showParticleEffects = true;
-		showDock();
-	}
-
-	function toggleMasterSettings() {
-		closeAllPanels();
-		showMasterSettings = true;
-		showDock();
-	}
-
-	function handleDockItemClick(item: string) {
-		switch (item) {
-			case 'colors':
-				toggleColorGrid();
-				break;
-			case 'timer':
-				toggleTimerSettings();
-				break;
-			case 'water':
-				toggleWaterEffects();
-				break;
-			case 'light':
-				toggleLightEffects();
-				break;
-			case 'particles':
-				toggleParticleEffects();
-				break;
-			case 'settings':
-				toggleMasterSettings();
-				break;
-			default:
-				break;
+		if (!wasVisible) {
+			switch (panel) {
+				case 'colors':
+					showColorGrid = true;
+					break;
+				case 'timer':
+					showTimerSettings = true;
+					break;
+				case 'water':
+					showWaterEffects = true;
+					break;
+				case 'light':
+					showLightEffects = true;
+					break;
+				case 'particles':
+					showParticleEffects = true;
+					break;
+				case 'settings':
+					showMasterSettings = true;
+					break;
+			}
 		}
+		showDock();
 	}
 
 	function handleMouseEnter(index: number) {
@@ -158,262 +149,191 @@
 		hoveredIndex = -1;
 	}
 
-	function calculateScale(index: number, hoveredIndex: number): number {
+	function calculateScale(index: number): number {
 		if (hoveredIndex === -1) return 1;
-		
 		const distance = Math.abs(index - hoveredIndex);
-		if (distance === 0) return 1.4; // Main hovered item (reduced from 1.6)
-		if (distance === 1) return 1.2; // Adjacent items (reduced from 1.3)
-		if (distance === 2) return 1.05; // Items 2 positions away (reduced from 1.1)
-		return 1; // All other items remain normal size
+		if (distance === 0) return 1.25;
+		if (distance === 1) return 1.1;
+		if (distance === 2) return 1.05;
+		return 1;
 	}
+
+	const dockItems = [
+		{
+			id: 'colors',
+			title: 'Color Palette',
+			icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c1.34 0 2.61-.26 3.79-.75 1.15-.47 2.22-1.13 3.21-1.95.99-.82 1.87-1.77 2.63-2.81.54-.74.99-1.53 1.37-2.39.37-.85.64-1.76.81-2.7.17-.94.25-1.92.25-2.91 0-5.52-4.48-10-10-10zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/><path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c1.66 0 3.16-.67 4.24-1.76.33-.33.62-.69.88-1.07C17.51 14.31 18 13.19 18 12c0-3.31-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/><circle cx="12" cy="12" r="2"/></svg>`
+		},
+		{
+			id: 'water',
+			title: 'Water Effects',
+			icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12C2 6.48 6.48 2 12 2s10 4.48 10 10-4.48 10-10 10S2 17.52 2 12zm5.29-4.71a7.983 7.983 0 0 1 9.42 0 7.983 7.983 0 0 1 0 9.42 7.983 7.983 0 0 1-9.42 0 7.983 7.983 0 0 1 0-9.42zM9 12c0-1.66 1.34-3 3-3s3 1.34 3 3-1.34 3-3 3-3-1.34-3-3z"/></svg>`
+		},
+		{
+			id: 'light',
+			title: 'Light Effects',
+			icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4m-2.83-7.07l-2.83 2.83M16.24 16.24l-2.83 2.83M12 6a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg>`
+		},
+		{
+			id: 'particles',
+			title: 'Particle Effects',
+			icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="5" r="1"/><circle cx="5" cy="19" r="1"/><circle cx="5" cy="5" r="1"/><circle cx="19" cy="19" r="1"/></svg>`
+		},
+		{
+			id: 'timer',
+			title: 'Timer Settings',
+			icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>`
+		},
+		{
+			id: 'settings',
+			title: 'Master Settings',
+			icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19.14 12.94a8.003 8.003 0 0 0-1.4-3.88l1.7-1.7a1 1 0 0 0 0-1.42l-1.83-1.83a1 1 0 0 0-1.42 0l-1.7 1.7A8.003 8.003 0 0 0 9.06 4.86L7.34 3.14a1 1 0 0 0-1.42 0L4.09 4.97a1 1 0 0 0 0 1.42l1.7 1.7A8.003 8.003 0 0 0 4.86 12H3.14a1 1 0 0 0 0 2h1.72a8.003 8.003 0 0 0 1.4 3.88l-1.7 1.7a1 1 0 0 0 0 1.42l1.83 1.83a1 1 0 0 0 1.42 0l1.7-1.7c1.18.83 2.54 1.32 3.98 1.32s2.8-.49 3.98-1.32l1.7 1.7a1 1 0 0 0 1.42 0l1.83-1.83a1 1 0 0 0 0-1.42l-1.7-1.7a8.003 8.003 0 0 0 1.4-3.88h1.72a1 1 0 0 0 0-2h-1.72zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/></svg>`
+		}
+	];
+
+	$: activePanel = showColorGrid
+		? 'colors'
+		: showTimerSettings
+		? 'timer'
+		: showWaterEffects
+		? 'water'
+		: showLightEffects
+		? 'light'
+		: showParticleEffects
+		? 'particles'
+		: showMasterSettings
+		? 'settings'
+		: null;
 </script>
 
 <div
-	bind:this={dockElement}
-	class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 ease-out"
-	class:translate-y-24={!isVisible}
+	class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 ease-in-out"
+	class:translate-y-20={!isVisible}
 	class:opacity-0={!isVisible}
 	class:pointer-events-none={!isVisible}
 	on:mouseenter={handleDockMouseEnter}
 	on:mouseleave={handleDockMouseLeave}
 	role="toolbar"
 	aria-label="Background Effects Dock"
-	tabindex="0"
 >
-	<div class="flex items-end gap-4 px-6 py-4 bg-black/80 backdrop-blur-md border border-white/10 rounded-2xl shadow-2xl"
-		 role="group"
-		 on:mouseleave={handleMouseLeave}>
-		<!-- Color Grid Picker -->
-		<button 
-			bind:this={dockItems[0]}
-			class="dock-item group"
-			class:active={showColorGrid}
-			title="Professional HSL Color Picker"
-			on:click={() => handleDockItemClick('colors')}
-			on:mouseenter={() => handleMouseEnter(0)}
-			aria-label="Professional HSL Color Picker"
-			style="transform: scale({calculateScale(0, hoveredIndex)})"
-		>
-			<span class="dock-icon text-2xl">🎨</span>
-		</button>
-		
-		<!-- Water Effects -->
-		<button 
-			bind:this={dockItems[1]}
-			class="dock-item group"
-			class:active={showWaterEffects}
-			title="Water Effects"
-			on:click={() => handleDockItemClick('water')}
-			on:mouseenter={() => handleMouseEnter(1)}
-			aria-label="Water Effects"
-			style="transform: scale({calculateScale(1, hoveredIndex)})"
-		>
-			<span class="dock-icon text-2xl">🌊</span>
-		</button>
-		
-		<!-- Light Effects -->
-		<button 
-			bind:this={dockItems[2]}
-			class="dock-item group"
-			class:active={showLightEffects}
-			title="Light Effects"
-			on:click={() => handleDockItemClick('light')}
-			on:mouseenter={() => handleMouseEnter(2)}
-			aria-label="Light Effects"
-			style="transform: scale({calculateScale(2, hoveredIndex)})"
-		>
-			<span class="dock-icon text-2xl">✨</span>
-		</button>
-		
-		<!-- Particle Effects -->
-		<button 
-			bind:this={dockItems[3]}
-			class="dock-item group"
-			class:active={showParticleEffects}
-			title="Particle Effects"
-			on:click={() => handleDockItemClick('particles')}
-			on:mouseenter={() => handleMouseEnter(3)}
-			aria-label="Particle Effects"
-			style="transform: scale({calculateScale(3, hoveredIndex)})"
-		>
-			<span class="dock-icon text-2xl">💫</span>
-		</button>
-		<!-- Timer Settings -->
-		<button 
-			bind:this={dockItems[4]}
-			class="dock-item group"
-			class:active={showTimerSettings}
-			title="Timer Settings"
-			on:click={() => handleDockItemClick('timer')}
-			on:mouseenter={() => handleMouseEnter(4)}
-			aria-label="Timer Settings"
-			style="transform: scale({calculateScale(4, hoveredIndex)})"
-		>
-			<span class="dock-icon text-2xl">⏱️</span>
-		</button>
-		<!-- Master Settings -->
-		<button 
-			bind:this={dockItems[5]}
-			class="dock-item group"
-			class:active={showMasterSettings}
-			title="Master Settings"
-			on:click={() => handleDockItemClick('settings')}
-			on:mouseenter={() => handleMouseEnter(5)}
-			aria-label="Master Settings"
-			style="transform: scale({calculateScale(5, hoveredIndex)})"
-		>
-			<span class="dock-icon text-2xl">⚙️</span>
-		</button>
+	<div
+		class="flex items-end justify-center gap-2"
+		on:mouseleave={handleMouseLeave}
+		role="group"
+	>
+		{#each dockItems as item, index (item.id)}
+			<button
+				class="dock-item"
+				class:active={activePanel === item.id}
+				title={item.title}
+				on:click={() => togglePanel(item.id)}
+				on:mouseenter={() => handleMouseEnter(index)}
+				aria-label={item.title}
+				style={`transform: scale(${calculateScale(index)});`}
+			>
+				<div class="dock-icon">{@html item.icon}</div>
+			</button>
+		{/each}
 	</div>
 
-	<!-- Color Grid Panel -->
-	{#if showColorGrid}
-		<div 
-			class="panel-container color-grid-panel"
-			class:visible={showColorGrid}
-		>
-			<ProfessionalHSLPicker />
-		</div>
-	{/if}
-
-	<!-- Timer Settings Panel -->
-	{#if showTimerSettings}
-		<div 
-			class="panel-container timer-settings-panel"
-			class:visible={showTimerSettings}
-		>
-			<TimerSettings />
-		</div>
-	{/if}
-
-	<!-- Water Effects Panel -->
-	{#if showWaterEffects}
-		<div 
-			class="panel-container water-effects-panel"
-			class:visible={showWaterEffects}
-		>
-			<WaterEffectsPanel />
-		</div>
-	{/if}
-
-	<!-- Light Effects Panel -->
-	{#if showLightEffects}
-		<div 
-			class="panel-container light-effects-panel"
-			class:visible={showLightEffects}
-		>
-			<LightEffectsPanel />
-		</div>
-	{/if}
-
-	<!-- Particle Effects Panel -->
-	{#if showParticleEffects}
-		<div 
-			class="panel-container particle-effects-panel"
-			class:visible={showParticleEffects}
-		>
-			<ParticleEffectsPanel />
-		</div>
-	{/if}
-
-	<!-- Master Settings Panel -->
-	{#if showMasterSettings}
-		<div 
-			class="panel-container master-settings-panel"
-			class:visible={showMasterSettings}
-		>
+	<!-- Panels -->
+	<div class="panel-container" class:visible={activePanel}>
+		{#if showColorGrid}
+			<ProfessionalHSLPicker on:close={closeAllPanels} />
+		{/if}
+		{#if showTimerSettings}
+			<TimerSettings on:close={closeAllPanels} />
+		{/if}
+		{#if showWaterEffects}
+			<WaterEffectsPanel on:close={closeAllPanels} />
+		{/if}
+		{#if showLightEffects}
+			<LightEffectsPanel on:close={closeAllPanels} />
+		{/if}
+		{#if showParticleEffects}
+			<ParticleEffectsPanel on:close={closeAllPanels} />
+		{/if}
+		{#if showMasterSettings}
 			<div class="placeholder-panel">
 				<h3>Master Settings</h3>
 				<p>Coming soon...</p>
+				<button on:click={closeAllPanels}>Close</button>
 			</div>
-		</div>
-	{/if}
+		{/if}
+	</div>
 </div>
 
 <style>
 	.dock-item {
-		width: 4rem;
-		height: 4rem;
-		border-radius: 0.75rem;
-		background-color: rgba(255, 255, 255, 0.05);
+		width: 48px;
+		height: 48px;
+		border-radius: 12px;
+		background-color: rgba(30, 30, 30, 0.5);
 		border: 1px solid rgba(255, 255, 255, 0.1);
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 		transform-origin: center bottom;
 		cursor: pointer;
-	}
-	
-	.dock-item:hover {
-		background-color: rgba(255, 255, 255, 0.1);
-		border-color: rgba(255, 255, 255, 0.2);
-		box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-	}
-	
-	.dock-item:focus {
-		outline: none;
-		box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
-	}
-	
-	.dock-item.active {
-		background-color: rgba(59, 130, 246, 0.2);
-		border-color: rgba(59, 130, 246, 0.4);
-		box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.2), 0 4px 6px -2px rgba(59, 130, 246, 0.1);
-	}
-	
-	.dock-item.active .dock-icon {
-		filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.6));
-	}
-	
-	.dock-icon {
-		user-select: none;
-		filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
-		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-		pointer-events: none;
+		-webkit-backdrop-filter: blur(10px);
+		backdrop-filter: blur(10px);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 	}
 
-	/* Panel positioning and animations */
+	.dock-item:hover {
+		background-color: rgba(45, 45, 45, 0.6);
+		border-color: rgba(255, 255, 255, 0.2);
+	}
+
+	.dock-item:active,
+	.dock-item.active {
+		background-color: rgba(80, 130, 250, 0.3);
+		border-color: rgba(80, 130, 250, 0.6);
+		transform: scale(1.1) !important;
+	}
+
+	.dock-icon {
+		width: 24px;
+		height: 24px;
+		color: rgba(255, 255, 255, 0.8);
+		transition: all 0.2s ease;
+	}
+
+	.dock-item:hover .dock-icon {
+		color: white;
+	}
+
+	.dock-item.active .dock-icon {
+		color: white;
+		filter: drop-shadow(0 0 5px rgba(80, 130, 250, 0.7));
+	}
+
 	.panel-container {
 		position: absolute;
-		bottom: 90px;
+		bottom: calc(100% + 10px);
 		left: 50%;
-		transform: translate(-50%, 20px);
+		transform: translate(-50%, 10px);
 		opacity: 0;
 		pointer-events: none;
-		transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-		z-index: 999;
+		transition:
+			transform 0.25s ease-out,
+			opacity 0.25s ease-out;
+		z-index: -1;
 	}
-	
+
 	.panel-container.visible {
 		transform: translate(-50%, 0);
 		opacity: 1;
 		pointer-events: auto;
 	}
-	
+
 	.placeholder-panel {
-		background: rgba(0, 0, 0, 0.95);
-		border: 1px solid rgba(255, 255, 255, 0.15);
-		border-radius: 20px;
-		padding: 40px;
-		backdrop-filter: blur(25px);
-		box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 8px 16px rgba(0, 0, 0, 0.2), inset 0 1px rgba(255, 255, 255, 0.1);
-		min-width: 300px;
-		text-align: center;
-	}
-	
-	.placeholder-panel h3 {
-		color: rgba(255, 255, 255, 0.9);
-		font-size: 20px;
-		font-weight: 600;
-		margin-bottom: 12px;
-		text-transform: uppercase;
-		letter-spacing: 1px;
-	}
-	
-	.placeholder-panel p {
-		color: rgba(255, 255, 255, 0.6);
-		font-size: 14px;
+		padding: 20px;
+		background: rgba(20, 20, 20, 0.8);
+		border-radius: 16px;
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		backdrop-filter: blur(15px);
+		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 	}
 </style>
