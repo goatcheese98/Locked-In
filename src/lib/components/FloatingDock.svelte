@@ -3,6 +3,7 @@
 	import ProfessionalHSLPicker from './ProfessionalHSLPicker.svelte';
 	import TimerSettings from './TimerSettings.svelte';
 	import WaterEffectsPanel from './WaterEffectsPanel.svelte';
+	import ParticleEffectsPanel from './ParticleEffectsPanel.svelte';
 
 	let dockElement: HTMLDivElement;
 	let isVisible = false;
@@ -263,10 +264,7 @@
 			class="panel-container particle-effects-panel"
 			class:visible={showParticleEffects}
 		>
-			<div class="placeholder-panel">
-				<h3>Particle Effects</h3>
-				<p>Coming soon...</p>
-			</div>
+			<ParticleEffectsPanel />
 		</div>
 	{/if}
 
