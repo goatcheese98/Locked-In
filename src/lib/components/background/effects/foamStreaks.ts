@@ -203,7 +203,7 @@ export function createFoamStreak(canvasWidth: number, canvasHeight: number): voi
 		Math.floor(
 			Math.random() * (FOAM_STREAK_MAIN_PATH_SEGMENTS_MAX - FOAM_STREAK_MAIN_PATH_SEGMENTS_MIN + 1)
 		);
-	generatePathParticles(0, 0, baseAngle, mainPathSegments, false);
+	// Note: generatePathParticles is now called after the streak is added below
 
 	// Create the streak object itself (particles array is initially empty)
 	const newStreakProps = {

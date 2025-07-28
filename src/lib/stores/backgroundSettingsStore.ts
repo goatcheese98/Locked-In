@@ -12,6 +12,16 @@ export interface BackgroundSettings {
 	gradientColor2HistoryIndex: number;
 	isAutoCyclingColor1: boolean;
 	isAutoCyclingColor2: boolean;
+	// Light Effects
+	sunGlowEnabled: boolean;
+	sunGlowIntensity: number;
+	sunGlowSize: number;
+	sunGlowBlur: number;
+	glintsEnabled: boolean;
+	glintFrequency: number;
+	glintBrightness: number;
+	glintDuration: number;
+	glintSize: number;
 }
 
 const defaultBackgroundSettings: BackgroundSettings = {
@@ -23,7 +33,17 @@ const defaultBackgroundSettings: BackgroundSettings = {
 	gradientColor2History: ['hsl(200, 68%, 50%)'],
 	gradientColor2HistoryIndex: 0,
 	isAutoCyclingColor1: false,
-	isAutoCyclingColor2: false
+	isAutoCyclingColor2: false,
+	// Light Effects defaults
+	sunGlowEnabled: true,
+	sunGlowIntensity: 0.7,
+	sunGlowSize: 150,
+	sunGlowBlur: 60,
+	glintsEnabled: true,
+	glintFrequency: 20,
+	glintBrightness: 0.8,
+	glintDuration: 500,
+	glintSize: 4
 };
 
 function generateRandomHslColor(options?: { maxLightness?: number }): string {

@@ -4,6 +4,7 @@
 	import TimerSettings from './TimerSettings.svelte';
 	import WaterEffectsPanel from './WaterEffectsPanel.svelte';
 	import ParticleEffectsPanel from './ParticleEffectsPanel.svelte';
+	import LightEffectsPanel from './LightEffectsPanel.svelte';
 
 	let dockElement: HTMLDivElement;
 	let isVisible = false;
@@ -16,6 +17,8 @@
 	let showLightEffects = false;
 	let showParticleEffects = false;
 	let showMasterSettings = false;
+	let hoveredIndex = -1;
+	let dockItems: HTMLButtonElement[] = [];
 
 	const TRIGGER_ZONE_HEIGHT = 100; // pixels from bottom to trigger
 	const AUTO_HIDE_DELAY = 3000; // ms before auto-hide
@@ -146,73 +149,122 @@
 				break;
 		}
 	}
+
+	function handleMouseEnter(index: number) {
+		hoveredIndex = index;
+	}
+
+	function handleMouseLeave() {
+		hoveredIndex = -1;
+	}
+
+	function calculateScale(index: number, hoveredIndex: number): number {
+		if (hoveredIndex === -1) return 1;
+		
+		const distance = Math.abs(index - hoveredIndex);
+		if (distance === 0) return 1.4; // Main hovered item (reduced from 1.6)
+		if (distance === 1) return 1.2; // Adjacent items (reduced from 1.3)
+		if (distance === 2) return 1.05; // Items 2 positions away (reduced from 1.1)
+		return 1; // All other items remain normal size
+	}
 </script>
 
 <div
 	bind:this={dockElement}
-	class="floating-dock"
-	class:visible={isVisible}
+	class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 ease-out"
+	class:translate-y-24={!isVisible}
+	class:opacity-0={!isVisible}
+	class:pointer-events-none={!isVisible}
 	on:mouseenter={handleDockMouseEnter}
 	on:mouseleave={handleDockMouseLeave}
 	role="toolbar"
 	aria-label="Background Effects Dock"
+	tabindex="0"
 >
-	<div class="dock-container">
+	<div class="flex items-end gap-4 px-6 py-4 bg-black/80 backdrop-blur-md border border-white/10 rounded-2xl shadow-2xl"
+		 role="group"
+		 on:mouseleave={handleMouseLeave}>
 		<!-- Color Grid Picker -->
-		<div 
-			class="dock-item" 
+		<button 
+			bind:this={dockItems[0]}
+			class="dock-item group"
 			class:active={showColorGrid}
 			title="Professional HSL Color Picker"
 			on:click={() => handleDockItemClick('colors')}
+			on:mouseenter={() => handleMouseEnter(0)}
+			aria-label="Professional HSL Color Picker"
+			style="transform: scale({calculateScale(0, hoveredIndex)})"
 		>
-			<div class="dock-icon">🎨</div>
-		</div>
+			<span class="dock-icon text-2xl">🎨</span>
+		</button>
 		
 		<!-- Water Effects -->
-		<div 
-			class="dock-item"
+		<button 
+			bind:this={dockItems[1]}
+			class="dock-item group"
 			class:active={showWaterEffects}
 			title="Water Effects"
 			on:click={() => handleDockItemClick('water')}
+			on:mouseenter={() => handleMouseEnter(1)}
+			aria-label="Water Effects"
+			style="transform: scale({calculateScale(1, hoveredIndex)})"
 		>
-			<div class="dock-icon">🌊</div>
-		</div>
+			<span class="dock-icon text-2xl">🌊</span>
+		</button>
 		
 		<!-- Light Effects -->
-		<div 
-			class="dock-item"
+		<button 
+			bind:this={dockItems[2]}
+			class="dock-item group"
 			class:active={showLightEffects}
 			title="Light Effects"
 			on:click={() => handleDockItemClick('light')}
+			on:mouseenter={() => handleMouseEnter(2)}
+			aria-label="Light Effects"
+			style="transform: scale({calculateScale(2, hoveredIndex)})"
 		>
-			<div class="dock-icon">✨</div>
-		</div>
+			<span class="dock-icon text-2xl">✨</span>
+		</button>
 		
 		<!-- Particle Effects -->
-		<div 
-			class="dock-item"
+		<button 
+			bind:this={dockItems[3]}
+			class="dock-item group"
 			class:active={showParticleEffects}
 			title="Particle Effects"
 			on:click={() => handleDockItemClick('particles')}
+			on:mouseenter={() => handleMouseEnter(3)}
+			aria-label="Particle Effects"
+			style="transform: scale({calculateScale(3, hoveredIndex)})"
 		>
-			<div class="dock-icon">💫</div>
-		</div>
-		<div 
-			class="dock-item"
+			<span class="dock-icon text-2xl">💫</span>
+		</button>
+		<!-- Timer Settings -->
+		<button 
+			bind:this={dockItems[4]}
+			class="dock-item group"
 			class:active={showTimerSettings}
 			title="Timer Settings"
 			on:click={() => handleDockItemClick('timer')}
+			on:mouseenter={() => handleMouseEnter(4)}
+			aria-label="Timer Settings"
+			style="transform: scale({calculateScale(4, hoveredIndex)})"
 		>
-			<div class="dock-icon">⏱️</div>
-		</div>
-		<div 
-			class="dock-item"
+			<span class="dock-icon text-2xl">⏱️</span>
+		</button>
+		<!-- Master Settings -->
+		<button 
+			bind:this={dockItems[5]}
+			class="dock-item group"
 			class:active={showMasterSettings}
 			title="Master Settings"
 			on:click={() => handleDockItemClick('settings')}
+			on:mouseenter={() => handleMouseEnter(5)}
+			aria-label="Master Settings"
+			style="transform: scale({calculateScale(5, hoveredIndex)})"
 		>
-			<div class="dock-icon">⚙️</div>
-		</div>
+			<span class="dock-icon text-2xl">⚙️</span>
+		</button>
 	</div>
 
 	<!-- Color Grid Panel -->
@@ -251,10 +303,7 @@
 			class="panel-container light-effects-panel"
 			class:visible={showLightEffects}
 		>
-			<div class="placeholder-panel">
-				<h3>Light Effects</h3>
-				<p>Coming soon...</p>
-			</div>
+			<LightEffectsPanel />
 		</div>
 	{/if}
 
@@ -283,158 +332,77 @@
 </div>
 
 <style>
-	.floating-dock {
-		position: fixed;
-		bottom: 16px;
-		left: 50%;
-		transform: translateX(-50%) translateY(100px);
-		z-index: 1000;
-		opacity: 0;
-		transition: 
-			transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-			opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-		pointer-events: none;
-	}
-
-	.floating-dock.visible {
-		transform: translateX(-50%) translateY(0);
-		opacity: 1;
-		pointer-events: auto;
-	}
-
-	.dock-container {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		padding: 12px 16px;
-		background: rgba(0, 0, 0, 0.85);
-		backdrop-filter: blur(20px);
-		border: 1px solid rgba(255, 255, 255, 0.1);
-		border-radius: 24px;
-		box-shadow: 
-			0 8px 32px rgba(0, 0, 0, 0.3),
-			0 4px 16px rgba(0, 0, 0, 0.2),
-			inset 0 1px 0 rgba(255, 255, 255, 0.1);
-	}
-
 	.dock-item {
+		width: 4rem;
+		height: 4rem;
+		border-radius: 0.75rem;
+		background-color: rgba(255, 255, 255, 0.05);
+		border: 1px solid rgba(255, 255, 255, 0.1);
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 48px;
-		height: 48px;
-		background: rgba(255, 255, 255, 0.05);
-		border: 1px solid rgba(255, 255, 255, 0.08);
-		border-radius: 12px;
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		transform-origin: center bottom;
 		cursor: pointer;
-		transition: 
-			transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
-			background 0.2s cubic-bezier(0.4, 0, 0.2, 1),
-			border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
-			box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-		position: relative;
-		overflow: hidden;
 	}
-
-	.dock-item::before {
-		content: '';
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-		opacity: 0;
-		transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-	}
-
+	
 	.dock-item:hover {
-		transform: translateY(-4px) scale(1.05);
-		background: rgba(255, 255, 255, 0.1);
+		background-color: rgba(255, 255, 255, 0.1);
 		border-color: rgba(255, 255, 255, 0.2);
-		box-shadow: 
-			0 8px 24px rgba(0, 0, 0, 0.4),
-			0 4px 12px rgba(0, 0, 0, 0.3),
-			inset 0 1px 0 rgba(255, 255, 255, 0.2);
+		box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 	}
-
-	.dock-item:hover::before {
-		opacity: 1;
+	
+	.dock-item:focus {
+		outline: none;
+		box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
 	}
-
-	.dock-item:active {
-		transform: translateY(-2px) scale(1.02);
-		transition-duration: 0.1s;
-	}
-
+	
 	.dock-item.active {
-		background: rgba(59, 130, 246, 0.2);
+		background-color: rgba(59, 130, 246, 0.2);
 		border-color: rgba(59, 130, 246, 0.4);
-		box-shadow: 
-			0 0 20px rgba(59, 130, 246, 0.3),
-			0 8px 24px rgba(0, 0, 0, 0.4),
-			inset 0 1px 0 rgba(255, 255, 255, 0.2);
+		box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.2), 0 4px 6px -2px rgba(59, 130, 246, 0.1);
 	}
-
+	
 	.dock-item.active .dock-icon {
 		filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.6));
 	}
-
+	
 	.dock-icon {
-		font-size: 20px;
 		user-select: none;
-		filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
-	}
-
-	/* Hover zone indicator (optional, for development) */
-	.floating-dock::after {
-		content: '';
-		position: fixed;
-		bottom: 0;
-		left: 0;
-		right: 0;
-		height: 100px;
+		filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 		pointer-events: none;
-		/* Uncomment for debugging: */
-		/* background: rgba(255, 0, 0, 0.1); */
-		z-index: -1;
 	}
 
-	/* Panel Container - shared styles for all panels */
+	/* Panel positioning and animations */
 	.panel-container {
 		position: absolute;
-		bottom: 80px;
+		bottom: 90px;
 		left: 50%;
-		transform: translateX(-50%) translateY(20px);
+		transform: translate(-50%, 20px);
 		opacity: 0;
 		pointer-events: none;
-		transition: 
-			transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-			opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 		z-index: 999;
 	}
-
+	
 	.panel-container.visible {
-		transform: translateX(-50%) translateY(0);
+		transform: translate(-50%, 0);
 		opacity: 1;
 		pointer-events: auto;
 	}
-
-	/* Placeholder panel styles */
+	
 	.placeholder-panel {
 		background: rgba(0, 0, 0, 0.95);
 		border: 1px solid rgba(255, 255, 255, 0.15);
 		border-radius: 20px;
 		padding: 40px;
 		backdrop-filter: blur(25px);
-		box-shadow: 
-			0 20px 40px rgba(0, 0, 0, 0.4),
-			0 8px 16px rgba(0, 0, 0, 0.2),
-			inset 0 1px rgba(255, 255, 255, 0.1);
+		box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 8px 16px rgba(0, 0, 0, 0.2), inset 0 1px rgba(255, 255, 255, 0.1);
 		min-width: 300px;
 		text-align: center;
 	}
-
+	
 	.placeholder-panel h3 {
 		color: rgba(255, 255, 255, 0.9);
 		font-size: 20px;
@@ -443,46 +411,9 @@
 		text-transform: uppercase;
 		letter-spacing: 1px;
 	}
-
+	
 	.placeholder-panel p {
 		color: rgba(255, 255, 255, 0.6);
 		font-size: 14px;
-	}
-
-	/* Responsive adjustments */
-	@media (max-width: 768px) {
-		.floating-dock {
-			bottom: 12px;
-		}
-		
-		.dock-container {
-			padding: 10px 12px;
-			gap: 6px;
-		}
-		
-		.dock-item {
-			width: 44px;
-			height: 44px;
-		}
-		
-		.dock-icon {
-			font-size: 18px;
-		}
-	}
-
-	@media (max-width: 480px) {
-		.dock-container {
-			padding: 8px 10px;
-			gap: 4px;
-		}
-		
-		.dock-item {
-			width: 40px;
-			height: 40px;
-		}
-		
-		.dock-icon {
-			font-size: 16px;
-		}
 	}
 </style>

@@ -81,7 +81,7 @@
 	</button>
 
 	<button
-		on:click={resetTimer}
+		on:click={() => resetTimer()}
 		class="rounded-md border border-slate-400/30 bg-white/10 px-6 py-3 text-base font-semibold
            text-slate-200 transition-all duration-150 ease-in-out hover:bg-white/20 hover:text-rose-300
            focus:ring-2 focus:ring-rose-400

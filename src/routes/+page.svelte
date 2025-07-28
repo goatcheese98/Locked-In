@@ -11,11 +11,11 @@
 	// Format session display text
 	function formatSessionDisplay(session: SessionType): string {
 		switch (session) {
-			case 'work':
+			case 'Work':
 				return 'Focus Session';
-			case 'shortBreak':
+			case 'Short Break':
 				return 'Short Break';
-			case 'longBreak':
+			case 'Long Break':
 				return 'Long Break';
 			default:
 				return 'Session';
@@ -48,10 +48,10 @@
 		<!-- Session Info -->
 		{#if $timerState.currentSession}
 			<div class="text-lg font-medium text-white/80">
-				{formatSessionDisplay($timerState.currentSession.type)}
-				{#if $timerState.currentSession.type === 'work'}
+				{formatSessionDisplay($timerState.currentSession)}
+				{#if $timerState.currentSession === 'Work'}
 					<span class="text-sm text-white/60 block mt-1">
-						Session {$timerState.completedSessions + 1} of {$timerSettings.sessionsBeforeLongBreak}
+						Session {$timerState.currentCycleCount + 1} of {$timerSettings.sessionsBeforeLongBreak}
 					</span>
 				{/if}
 			</div>
