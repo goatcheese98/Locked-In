@@ -1,1 +1,8 @@
 @import 'tailwindcss';
+
+/* Ensure no default background colors */
+html, body {
+	background: transparent;
+	margin: 0;
+	padding: 0;
+}

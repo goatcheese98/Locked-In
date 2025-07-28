@@ -25,24 +25,6 @@
 	// --- Local Background Settings State ---
 	let localIsFloatingEnabled = $backgroundSettings.isFloatingEnabled;
 
-	// --- Dynamic Main Container Background Colors ---
-	const mainStartBg = { h: 222, s: 20, l: 22 }; // Dark slate-like base
-	const mainEndBg = { h: 230, s: 25, l: 30 }; // Slightly more purplish/bluish and lighter
-
-	let currentMainBgH = mainStartBg.h;
-	let currentMainBgS = mainStartBg.s;
-	let currentMainBgL = mainStartBg.l;
-
-	// Background color animation variables
-	let mainBgTargetH = mainStartBg.h;
-	let mainBgTargetS = mainStartBg.s;
-	let mainBgTargetL = mainStartBg.l;
-	let mainBgTransitionProgress = 0;
-	let mainBgTransitionDuration = 0;
-	let mainBgTransitionStartTime = 0;
-
-	// --- Animation Frame ID ---
-	let colorAnimationId: number;
 
 	onMount(() => {
 		hasMounted = true;
@@ -50,74 +32,8 @@
 		// Initialize Background Settings
 		localIsFloatingEnabled = $backgroundSettings.isFloatingEnabled;
 
-		// --- Combined Color Animation Loop ---
-		function animationLoop() {
-			const currentTime = Date.now();
-
-			// Main container background color animation
-			if (mainBgTransitionProgress < 1 && mainBgTransitionDuration > 0) {
-				const elapsed = currentTime - mainBgTransitionStartTime;
-				mainBgTransitionProgress = Math.min(1, elapsed / mainBgTransitionDuration);
-
-				const eased = easeInOutCubic(mainBgTransitionProgress);
-				currentMainBgH = lerp(mainStartBg.h, mainBgTargetH, eased);
-				currentMainBgS = lerp(mainStartBg.s, mainBgTargetS, eased);
-				currentMainBgL = lerp(mainStartBg.l, mainBgTargetL, eased);
-			}
-
-			colorAnimationId = requestAnimationFrame(animationLoop);
-		}
-		colorAnimationId = requestAnimationFrame(animationLoop); // Start the animation loop
 	});
 
-	onDestroy(() => {
-		if (colorAnimationId) {
-			cancelAnimationFrame(colorAnimationId);
-		}
-	});
-
-	// Helper functions for animations
-	function lerp(start: number, end: number, t: number): number {
-		return start + (end - start) * t;
-	}
-
-	function easeInOutCubic(t: number): number {
-		return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-	}
-
-	// --- Background Color Transitions based on Timer State ---
-	$: if ($timerState.currentSession) {
-		let targetBg: { h: number; s: number; l: number };
-		switch ($timerState.currentSession.type) {
-			case 'work':
-				// Slightly warmer/more energetic for work sessions
-				targetBg = { h: 210, s: 25, l: 24 };
-				break;
-			case 'shortBreak':
-				// More relaxed, slightly cooler
-				targetBg = { h: 240, s: 20, l: 28 };
-				break;
-			case 'longBreak':
-				// Even more relaxed
-				targetBg = { h: 250, s: 18, l: 32 };
-				break;
-			default:
-				targetBg = mainStartBg;
-		}
-
-		if (
-			targetBg.h !== mainBgTargetH ||
-			targetBg.s !== mainBgTargetS ||
-			targetBg.l !== mainBgTargetL
-		) {
-			mainBgTargetH = targetBg.h;
-			mainBgTargetS = targetBg.s;
-			mainBgTargetL = targetBg.l;
-			mainBgTransitionProgress = 0;
-			mainBgTransitionDuration = 2000; // 2 second transition
-			mainBgTransitionStartTime = Date.now();
-		}
-	}
 
 	// Update Timer Settings store when local values change
 	$: if (hasMounted) {
@@ -206,9 +122,6 @@
 <!-- Main Content Container -->
 <main
 	class="relative z-10 flex min-h-screen flex-col items-center justify-center px-4 py-8 transition-all duration-1000 ease-in-out"
-	style="background: linear-gradient(135deg, 
-		hsla({currentMainBgH}, {currentMainBgS}%, {currentMainBgL}%, 0.85) 0%, 
-		hsla({currentMainBgH + 10}, {currentMainBgS + 5}%, {currentMainBgL + 8}%, 0.75) 100%)"
 >
 	<div class="w-full max-w-md space-y-8 text-center">
 		<!-- Timer Display -->
