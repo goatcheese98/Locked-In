@@ -1,0 +1,56 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/rohanjasani/projects2/Locked-In"
+      ]
+    },
+    "context7-mcp": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@smithery/cli@latest",
+        "run",
+        "@upstash/context7-mcp",
+        "--key",
+        "4135ce6e-e5a5-45f1-a6bb-8023fd91210e",
+        "--profile",
+        "financial-reptile-WGz0ut"
+      ]
+    },
+    "github": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@smithery/cli@latest",
+        "run",
+        "@smithery-ai/github",
+        "--key",
+        "4135ce6e-e5a5-45f1-a6bb-8023fd91210e",
+        "--profile",
+        "financial-reptile-WGz0ut"
+      ]
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest"
+      ]
+    },
+    "browsermcp": {
+      "command": "npx",
+      "args": ["@browsermcp/mcp@latest"]
+    },
+    "serena": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/oraios/serena",
+        "serena-mcp-server"
+      ]
+    }
+  }
+}

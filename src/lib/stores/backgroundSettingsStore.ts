@@ -15,12 +15,12 @@ export interface BackgroundSettings {
 }
 
 const defaultBackgroundSettings: BackgroundSettings = {
-	gradientColor1: 'hsl(210, 70%, 25%)',
-	gradientColor2: 'hsl(200, 68%, 27%)',
+	gradientColor1: 'hsl(210, 70%, 50%)',
+	gradientColor2: 'hsl(200, 68%, 50%)',
 	isFloatingEnabled: true,
-	gradientColor1History: ['hsl(210, 70%, 25%)'],
+	gradientColor1History: ['hsl(210, 70%, 50%)'],
 	gradientColor1HistoryIndex: 0,
-	gradientColor2History: ['hsl(200, 68%, 27%)'],
+	gradientColor2History: ['hsl(200, 68%, 50%)'],
 	gradientColor2HistoryIndex: 0,
 	isAutoCyclingColor1: false,
 	isAutoCyclingColor2: false
@@ -30,7 +30,7 @@ function generateRandomHslColor(options?: { maxLightness?: number }): string {
 	const h = Math.floor(Math.random() * 361);
 	const s = Math.floor(Math.random() * 51) + 50;
 	const minLightness = 0;
-	const upperLightnessLimit = options?.maxLightness ?? 50;
+	const upperLightnessLimit = options?.maxLightness ?? 100;
 	const actualMaxLightness = Math.max(minLightness, upperLightnessLimit);
 	const l = Math.floor(Math.random() * (actualMaxLightness - minLightness + 1)) + minLightness;
 	return `hsl(${h}, ${s}%, ${l}%)`;
@@ -46,6 +46,19 @@ function parseHslString(
 }
 
 // NEW: Function for controlled random step
+// Helper functions to get individual HSL values from stored colors
+export function getGradientColor1HSL(): { h: number; s: number; l: number } {
+	const current = get(backgroundSettings);
+	const parsed = parseHslString(current.gradientColor1);
+	return parsed || { h: 210, s: 70, l: 50 }; // fallback
+}
+
+export function getGradientColor2HSL(): { h: number; s: number; l: number } {
+	const current = get(backgroundSettings);
+	const parsed = parseHslString(current.gradientColor2);
+	return parsed || { h: 200, s: 68, l: 50 }; // fallback
+}
+
 export function generateControlledRandomStep(currentHslString: string): string {
 	const currentHsl = parseHslString(currentHslString);
 	if (!currentHsl) {
@@ -65,11 +78,11 @@ export function generateControlledRandomStep(currentHslString: string): string {
 		deltaS = Math.random() * 10 - 5; // +/- 5
 	}
 
-	// Calculate deltaL with oscillation logic (Max L is 50)
+	// Calculate deltaL with oscillation logic (Max L is 100)
 	let deltaL;
 	if (currentHsl.l <= 0) {
 		deltaL = Math.random() * 3; // Only increase
-	} else if (currentHsl.l >= 50) {
+	} else if (currentHsl.l >= 100) {
 		deltaL = Math.random() * -3; // Only decrease
 	} else {
 		deltaL = Math.random() * 6 - 3; // +/- 3
@@ -77,7 +90,7 @@ export function generateControlledRandomStep(currentHslString: string): string {
 
 	const newH = (currentHsl.h + deltaH + 360) % 360;
 	const newS = Math.max(0, Math.min(100, currentHsl.s + deltaS));
-	const newL = Math.max(0, Math.min(50, currentHsl.l + deltaL)); // Still clamp just in case
+	const newL = Math.max(0, Math.min(100, currentHsl.l + deltaL)); // Still clamp just in case
 
 	return `hsl(${Math.round(newH)}, ${Math.round(newS)}%, ${Math.round(newL)}%)`;
 }
@@ -173,7 +186,17 @@ function pushColorToHistory(
 	return { history: newHistory, index: newIndex };
 }
 
-export function setGradientColor1(newColor: string) {
+export function setGradientColor1(newColor: string): void;
+export function setGradientColor1(h: number, s: number, l: number): void;
+export function setGradientColor1(hOrColor: string | number, s?: number, l?: number) {
+	let newColor: string;
+	
+	if (typeof hOrColor === 'string') {
+		newColor = hOrColor;
+	} else {
+		newColor = `hsl(${Math.round(hOrColor)}, ${Math.round(s!)}%, ${Math.round(l!)}%)`;
+	}
+
 	const current = get(backgroundSettings);
 	if (current.gradientColor1 === newColor) return;
 
@@ -190,7 +213,17 @@ export function setGradientColor1(newColor: string) {
 	}));
 }
 
-export function setGradientColor2(newColor: string) {
+export function setGradientColor2(newColor: string): void;
+export function setGradientColor2(h: number, s: number, l: number): void;
+export function setGradientColor2(hOrColor: string | number, s?: number, l?: number) {
+	let newColor: string;
+	
+	if (typeof hOrColor === 'string') {
+		newColor = hOrColor;
+	} else {
+		newColor = `hsl(${Math.round(hOrColor)}, ${Math.round(s!)}%, ${Math.round(l!)}%)`;
+	}
+
 	const current = get(backgroundSettings);
 	if (current.gradientColor2 === newColor) return;
 
@@ -208,11 +241,11 @@ export function setGradientColor2(newColor: string) {
 }
 
 export function randomizeGradientColor1(): string {
-	return generateRandomHslColor({ maxLightness: 50 });
+	return generateRandomHslColor({ maxLightness: 100 });
 }
 
 export function randomizeGradientColor2(): string {
-	return generateRandomHslColor({ maxLightness: 50 });
+	return generateRandomHslColor({ maxLightness: 100 });
 }
 
 export function previousGradientColor1() {

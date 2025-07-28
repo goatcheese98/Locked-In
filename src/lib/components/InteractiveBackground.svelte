@@ -125,8 +125,8 @@
 		updateAndDrawFoamStreaks as updateAndDrawFoamStreaksEffect
 	} from './background/effects/foamStreaks';
 
-	export let gradientColor1: string = 'hsl(210, 70%, 25%)'; // Default Color 1
-	export let gradientColor2: string = 'hsl(200, 68%, 27%)'; // Default Color 2
+	export let gradientColor1: string = 'hsl(210, 70%, 50%)'; // Default Color 1
+	export let gradientColor2: string = 'hsl(200, 68%, 50%)'; // Default Color 2
 
 	let canvasRef: HTMLCanvasElement;
 	// To help TypeScript and linters, we'll use local non-null vars inside functions after checks
@@ -394,8 +394,16 @@
 			const gradX2 = interpolatedGradientCoords.x2 * canvas.width;
 			const gradY2 = interpolatedGradientCoords.y2 * canvas.height;
 			const gradient = ctx.createLinearGradient(gradX1, gradY1, gradX2, gradY2);
-			gradient.addColorStop(0, gradientColor1);
-			gradient.addColorStop(1, gradientColor2);
+			// Validate color values before using them
+			const color1 = typeof gradientColor1 === 'string' && gradientColor1.includes('hsl') 
+				? gradientColor1 
+				: 'hsl(210, 70%, 50%)';
+			const color2 = typeof gradientColor2 === 'string' && gradientColor2.includes('hsl') 
+				? gradientColor2 
+				: 'hsl(200, 68%, 50%)';
+			
+			gradient.addColorStop(0, color1);
+			gradient.addColorStop(1, color2);
 			ctx.fillStyle = gradient;
 			ctx.fillRect(0, 0, canvas.width, canvas.height);
 			// ---
