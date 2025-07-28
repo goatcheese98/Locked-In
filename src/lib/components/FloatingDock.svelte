@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import ProfessionalHSLPicker from './ProfessionalHSLPicker.svelte';
 	import TimerSettings from './TimerSettings.svelte';
+	import WaterEffectsPanel from './WaterEffectsPanel.svelte';
 
 	let dockElement: HTMLDivElement;
 	let isVisible = false;
@@ -10,6 +11,10 @@
 	let windowHeight = 0;
 	let showColorGrid = false;
 	let showTimerSettings = false;
+	let showWaterEffects = false;
+	let showLightEffects = false;
+	let showParticleEffects = false;
+	let showMasterSettings = false;
 
 	const TRIGGER_ZONE_HEIGHT = 100; // pixels from bottom to trigger
 	const AUTO_HIDE_DELAY = 3000; // ms before auto-hide
@@ -71,20 +76,49 @@
 		scheduleHide();
 	}
 
-	function toggleColorGrid() {
-		showColorGrid = !showColorGrid;
+	function closeAllPanels() {
+		showColorGrid = false;
 		showTimerSettings = false;
-		if (showColorGrid) {
-			showDock(); // Keep dock visible when grid is open
-		}
+		showWaterEffects = false;
+		showLightEffects = false;
+		showParticleEffects = false;
+		showMasterSettings = false;
+	}
+
+	function toggleColorGrid() {
+		closeAllPanels();
+		showColorGrid = true;
+		showDock();
 	}
 
 	function toggleTimerSettings() {
-		showTimerSettings = !showTimerSettings;
-		showColorGrid = false;
-		if (showTimerSettings) {
-			showDock(); // Keep dock visible when settings are open
-		}
+		closeAllPanels();
+		showTimerSettings = true;
+		showDock();
+	}
+
+	function toggleWaterEffects() {
+		closeAllPanels();
+		showWaterEffects = true;
+		showDock();
+	}
+
+	function toggleLightEffects() {
+		closeAllPanels();
+		showLightEffects = true;
+		showDock();
+	}
+
+	function toggleParticleEffects() {
+		closeAllPanels();
+		showParticleEffects = true;
+		showDock();
+	}
+
+	function toggleMasterSettings() {
+		closeAllPanels();
+		showMasterSettings = true;
+		showDock();
 	}
 
 	function handleDockItemClick(item: string) {
@@ -95,8 +129,19 @@
 			case 'timer':
 				toggleTimerSettings();
 				break;
+			case 'water':
+				toggleWaterEffects();
+				break;
+			case 'light':
+				toggleLightEffects();
+				break;
+			case 'particles':
+				toggleParticleEffects();
+				break;
+			case 'settings':
+				toggleMasterSettings();
+				break;
 			default:
-				// Handle other dock items
 				break;
 		}
 	}
@@ -122,14 +167,33 @@
 			<div class="dock-icon">🎨</div>
 		</div>
 		
-		<!-- Placeholder dock items - will be replaced with background effect controls -->
-		<div class="dock-item" title="Water Effects">
+		<!-- Water Effects -->
+		<div 
+			class="dock-item"
+			class:active={showWaterEffects}
+			title="Water Effects"
+			on:click={() => handleDockItemClick('water')}
+		>
 			<div class="dock-icon">🌊</div>
 		</div>
-		<div class="dock-item" title="Light Effects">
+		
+		<!-- Light Effects -->
+		<div 
+			class="dock-item"
+			class:active={showLightEffects}
+			title="Light Effects"
+			on:click={() => handleDockItemClick('light')}
+		>
 			<div class="dock-icon">✨</div>
 		</div>
-		<div class="dock-item" title="Particle Effects">
+		
+		<!-- Particle Effects -->
+		<div 
+			class="dock-item"
+			class:active={showParticleEffects}
+			title="Particle Effects"
+			on:click={() => handleDockItemClick('particles')}
+		>
 			<div class="dock-icon">💫</div>
 		</div>
 		<div 
@@ -140,7 +204,12 @@
 		>
 			<div class="dock-icon">⏱️</div>
 		</div>
-		<div class="dock-item" title="Settings">
+		<div 
+			class="dock-item"
+			class:active={showMasterSettings}
+			title="Master Settings"
+			on:click={() => handleDockItemClick('settings')}
+		>
 			<div class="dock-icon">⚙️</div>
 		</div>
 	</div>
@@ -162,6 +231,55 @@
 			class:visible={showTimerSettings}
 		>
 			<TimerSettings />
+		</div>
+	{/if}
+
+	<!-- Water Effects Panel -->
+	{#if showWaterEffects}
+		<div 
+			class="panel-container water-effects-panel"
+			class:visible={showWaterEffects}
+		>
+			<WaterEffectsPanel />
+		</div>
+	{/if}
+
+	<!-- Light Effects Panel -->
+	{#if showLightEffects}
+		<div 
+			class="panel-container light-effects-panel"
+			class:visible={showLightEffects}
+		>
+			<div class="placeholder-panel">
+				<h3>Light Effects</h3>
+				<p>Coming soon...</p>
+			</div>
+		</div>
+	{/if}
+
+	<!-- Particle Effects Panel -->
+	{#if showParticleEffects}
+		<div 
+			class="panel-container particle-effects-panel"
+			class:visible={showParticleEffects}
+		>
+			<div class="placeholder-panel">
+				<h3>Particle Effects</h3>
+				<p>Coming soon...</p>
+			</div>
+		</div>
+	{/if}
+
+	<!-- Master Settings Panel -->
+	{#if showMasterSettings}
+		<div 
+			class="panel-container master-settings-panel"
+			class:visible={showMasterSettings}
+		>
+			<div class="placeholder-panel">
+				<h3>Master Settings</h3>
+				<p>Coming soon...</p>
+			</div>
 		</div>
 	{/if}
 </div>
@@ -302,6 +420,35 @@
 		transform: translateX(-50%) translateY(0);
 		opacity: 1;
 		pointer-events: auto;
+	}
+
+	/* Placeholder panel styles */
+	.placeholder-panel {
+		background: rgba(0, 0, 0, 0.95);
+		border: 1px solid rgba(255, 255, 255, 0.15);
+		border-radius: 20px;
+		padding: 40px;
+		backdrop-filter: blur(25px);
+		box-shadow: 
+			0 20px 40px rgba(0, 0, 0, 0.4),
+			0 8px 16px rgba(0, 0, 0, 0.2),
+			inset 0 1px rgba(255, 255, 255, 0.1);
+		min-width: 300px;
+		text-align: center;
+	}
+
+	.placeholder-panel h3 {
+		color: rgba(255, 255, 255, 0.9);
+		font-size: 20px;
+		font-weight: 600;
+		margin-bottom: 12px;
+		text-transform: uppercase;
+		letter-spacing: 1px;
+	}
+
+	.placeholder-panel p {
+		color: rgba(255, 255, 255, 0.6);
+		font-size: 14px;
 	}
 
 	/* Responsive adjustments */
