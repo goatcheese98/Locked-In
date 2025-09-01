@@ -587,17 +587,14 @@
 
 <style>
 	.professional-hsl-picker {
-		background: rgba(0, 0, 0, 0.95);
-		border: 1px solid rgba(255, 255, 255, 0.15);
-		border-radius: 20px;
+		background: rgba(0, 0, 0, 0.3);
+		backdrop-filter: blur(10px);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 12px;
 		padding: 20px;
-		backdrop-filter: blur(25px);
-		box-shadow: 
-			0 20px 40px rgba(0, 0, 0, 0.4),
-			0 8px 16px rgba(0, 0, 0, 0.2),
-			inset 0 1px rgba(255, 255, 255, 0.1);
 		min-width: 360px;
 		max-width: 400px;
+		color: white;
 	}
 
 	.picker-header {

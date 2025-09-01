@@ -329,11 +329,12 @@
 	}
 
 	.placeholder-panel {
-		padding: 20px;
-		background: rgba(20, 20, 20, 0.8);
-		border-radius: 16px;
+		background: rgba(0, 0, 0, 0.3);
+		backdrop-filter: blur(10px);
 		border: 1px solid rgba(255, 255, 255, 0.1);
-		backdrop-filter: blur(15px);
-		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+		border-radius: 12px;
+		padding: 20px;
+		width: 320px;
+		color: white;
 	}
 </style>

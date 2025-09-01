@@ -198,17 +198,13 @@
 
 <style>
 	.effects-panel {
-		background: rgba(0, 0, 0, 0.95);
-		border: 1px solid rgba(255, 255, 255, 0.15);
-		border-radius: 20px;
-		padding: 24px;
-		backdrop-filter: blur(25px);
-		box-shadow: 
-			0 20px 40px rgba(0, 0, 0, 0.4),
-			0 8px 16px rgba(0, 0, 0, 0.2),
-			inset 0 1px rgba(255, 255, 255, 0.1);
-		min-width: 380px;
-		max-width: 420px;
+		background: rgba(0, 0, 0, 0.3);
+		backdrop-filter: blur(10px);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 12px;
+		padding: 20px;
+		width: 320px;
+		color: white;
 	}
 
 	.panel-title {
