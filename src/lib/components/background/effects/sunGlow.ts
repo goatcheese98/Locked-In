@@ -114,6 +114,11 @@ function createSunGlint(glowCenterX: number, glowCenterY: number, glowCurrentRad
  * @param canvasHeight - The initial height of the canvas.
  */
 export function createSunGlow(canvasWidth: number, canvasHeight: number): void {
+	// Check if a sun glow already exists - there should only be one sun
+	if (getSunGlows().length > 0) {
+		return; // Don't create multiple suns
+	}
+
 	// Determine size based on the shorter canvas dimension.
 	const shorterCanvasSide = Math.min(canvasWidth, canvasHeight);
 	// Get a starting position biased towards the center.
@@ -187,8 +192,9 @@ export function updateAndDrawSunGlints(ctx: CanvasRenderingContext2D): void {
  * Draws the Sun Glow(s) using a radial gradient.
  *
  * @param ctx - The 2D canvas rendering context.
+ * @param settings - The background settings for dynamic control.
  */
-export function updateAndDrawSunGlows(ctx: CanvasRenderingContext2D): void {
+export function updateAndDrawSunGlows(ctx: CanvasRenderingContext2D, settings?: any): void {
 	const currentSunGlows: SunGlow[] = getSunGlows();
 	if (currentSunGlows.length === 0) return;
 
@@ -201,13 +207,27 @@ export function updateAndDrawSunGlows(ctx: CanvasRenderingContext2D): void {
 		const glow = currentSunGlows[i];
 
 		// --- Update Pulsing State ---
-		glow.pulseAngle += glow.pulseSpeed;
-		// Calculate current radius and opacity based on sine wave of pulse angle.
-		glow.currentRadius = glow.baseRadius + Math.sin(glow.pulseAngle) * glow.radiusAmplitude;
+		// Use dynamic pulse speed from settings
+		const dynamicPulseSpeed = settings?.sunGlowPulseSpeed || glow.pulseSpeed;
+		glow.pulseAngle += dynamicPulseSpeed;
+		
+		// Use dynamic size from settings
+		const dynamicSize = settings?.sunGlowSize || 150;
+		const baseRadius = dynamicSize * 0.8; // Convert from pixel size to radius
+		const radiusAmplitude = dynamicSize * 0.2;
+		
+		// Calculate current radius based on dynamic settings
+		glow.currentRadius = baseRadius + Math.sin(glow.pulseAngle) * radiusAmplitude;
+		
+		// Use dynamic intensity from settings
+		const dynamicIntensity = settings?.sunGlowIntensity || 0.7;
+		const baseOpacity = dynamicIntensity * 0.5; // Scale intensity to reasonable opacity
+		const opacityAmplitude = dynamicIntensity * 0.3;
+		
 		// Opacity pulse uses a slightly offset sine wave for variation.
 		glow.currentOpacity =
-			glow.baseOpacity +
-			(Math.sin(glow.pulseAngle * 0.7 + Math.PI / 3) * 0.5 + 0.5) * glow.opacityAmplitude;
+			baseOpacity +
+			(Math.sin(glow.pulseAngle * 0.7 + Math.PI / 3) * 0.5 + 0.5) * opacityAmplitude;
 		// Clamp opacity to valid range [0, 1].
 		glow.currentOpacity = Math.max(0, Math.min(1, glow.currentOpacity));
 		// --------------------------
@@ -224,11 +244,14 @@ export function updateAndDrawSunGlows(ctx: CanvasRenderingContext2D): void {
 
 		let numGlintsToSpawnThisFrame = 0;
 		if (normalizedGlowOpacity > 0) {
+			// Use dynamic glint intensity from settings
+			const glintIntensityMultiplier = settings?.sunGlintIntensity || 1;
+			
 			// Interpolate between target spawn rates based on whether opacity is below or above base.
 			if (normalizedGlowOpacity <= normalizedBaseOpacity) {
 				// Interpolate from 0 up to the base target rate.
 				const t = normalizedBaseOpacity > 0 ? normalizedGlowOpacity / normalizedBaseOpacity : 0;
-				numGlintsToSpawnThisFrame = Math.round(t * TARGET_GLINTS_TO_SPAWN_AT_BASE_OPACITY);
+				numGlintsToSpawnThisFrame = Math.round(t * TARGET_GLINTS_TO_SPAWN_AT_BASE_OPACITY * glintIntensityMultiplier);
 			} else {
 				// Interpolate from the base target rate up to the peak target rate.
 				const rangeBeyondBase = 1 - normalizedBaseOpacity;
@@ -237,15 +260,19 @@ export function updateAndDrawSunGlows(ctx: CanvasRenderingContext2D): void {
 						? (normalizedGlowOpacity - normalizedBaseOpacity) / rangeBeyondBase
 						: 1;
 				numGlintsToSpawnThisFrame = Math.round(
-					TARGET_GLINTS_TO_SPAWN_AT_BASE_OPACITY +
-						t * (TARGET_GLINTS_TO_SPAWN_AT_PEAK_OPACITY - TARGET_GLINTS_TO_SPAWN_AT_BASE_OPACITY)
+					(TARGET_GLINTS_TO_SPAWN_AT_BASE_OPACITY +
+						t * (TARGET_GLINTS_TO_SPAWN_AT_PEAK_OPACITY - TARGET_GLINTS_TO_SPAWN_AT_BASE_OPACITY)) * glintIntensityMultiplier
 				);
 			}
 		}
 		numGlintsToSpawnThisFrame = Math.max(0, numGlintsToSpawnThisFrame);
 
+		// Apply sun glint quantity multiplier from settings
+		const glintQuantityMultiplier = settings?.sunGlintQuantity || 1.0;
+		const adjustedGlintsToSpawn = Math.round(numGlintsToSpawnThisFrame * glintQuantityMultiplier);
+
 		// Create the calculated number of sun glints for this frame.
-		for (let k = 0; k < numGlintsToSpawnThisFrame; k++) {
+		for (let k = 0; k < adjustedGlintsToSpawn; k++) {
 			createSunGlint(glow.x, glow.y, glow.currentRadius);
 			// Stop if max glint limit is reached, even if more were calculated.
 			if (getSunGlints().length >= MAX_SUN_GLINTS) {
@@ -255,6 +282,11 @@ export function updateAndDrawSunGlows(ctx: CanvasRenderingContext2D): void {
 		// --------------------------
 
 		// --- Draw Sun Glow ---
+		// Apply dynamic blur from settings
+		const dynamicBlur = settings?.sunGlowBlur || 60;
+		const originalFilter = ctx.filter;
+		ctx.filter = `blur(${dynamicBlur}px)`;
+		
 		// Create a radial gradient for the glow effect.
 		const gradient = ctx.createRadialGradient(
 			glow.x,
@@ -276,6 +308,9 @@ export function updateAndDrawSunGlows(ctx: CanvasRenderingContext2D): void {
 		ctx.beginPath();
 		ctx.arc(glow.x, glow.y, glow.currentRadius, 0, Math.PI * 2);
 		ctx.fill();
+		
+		// Restore original filter
+		ctx.filter = originalFilter;
 		// ---------------------
 	}
 	// Restore original canvas state.

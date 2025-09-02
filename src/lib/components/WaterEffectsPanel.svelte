@@ -1,52 +1,25 @@
 <script lang="ts">
 	import { backgroundSettings } from '$lib/stores/backgroundSettingsStore';
-	import { createEventDispatcher } from 'svelte';
 	
-	const dispatch = createEventDispatcher();
+	$: settings = $backgroundSettings;
 	
-	// Water Effects Settings
-	let ripplesEnabled = true;
-	let rippleSize = 50;
-	let rippleSpeed = 0.35;
-	let rippleFrequency = 3000; // ms between ambient ripples
-	
-	let shimmerEnabled = true;
-	let shimmerIntensity = 0.5;
-	let shimmerSpeed = 1.0;
-	let shimmerCount = 5;
-	
-	// Apply settings
-	function applySettings() {
-		// This would connect to your animation state management
-		dispatch('update', {
-			ripples: {
-				enabled: ripplesEnabled,
-				size: rippleSize,
-				speed: rippleSpeed,
-				frequency: rippleFrequency
-			},
-			shimmer: {
-				enabled: shimmerEnabled,
-				intensity: shimmerIntensity,
-				speed: shimmerSpeed,
-				count: shimmerCount
-			}
-		});
+	function updateWaterSetting(key: string, value: any) {
+		backgroundSettings.update(s => ({
+			...s,
+			[key]: value
+		}));
 	}
 	
 	// Reset to defaults
 	function resetDefaults() {
-		ripplesEnabled = true;
-		rippleSize = 50;
-		rippleSpeed = 0.35;
-		rippleFrequency = 3000;
-		
-		shimmerEnabled = true;
-		shimmerIntensity = 0.5;
-		shimmerSpeed = 1.0;
-		shimmerCount = 5;
-		
-		applySettings();
+		updateWaterSetting('ripplesEnabled', true);
+		updateWaterSetting('rippleSize', 50);
+		updateWaterSetting('rippleSpeed', 0.35);
+		updateWaterSetting('rippleFrequency', 3000);
+		updateWaterSetting('shimmerEnabled', true);
+		updateWaterSetting('shimmerIntensity', 0.5);
+		updateWaterSetting('shimmerSpeed', 1.0);
+		updateWaterSetting('shimmerCount', 5);
 	}
 </script>
 
@@ -60,28 +33,28 @@
 			<label class="toggle-wrapper">
 				<input
 					type="checkbox"
-					bind:checked={ripplesEnabled}
-					on:change={applySettings}
+					checked={settings.ripplesEnabled}
+					on:change={(e) => updateWaterSetting('ripplesEnabled', e.currentTarget.checked)}
 					class="toggle-input"
 				/>
 				<span class="toggle-label">Enable</span>
 			</label>
 		</div>
 		
-		{#if ripplesEnabled}
+		{#if settings.ripplesEnabled}
 			<div class="controls-grid">
 				<div class="control-item">
 					<label class="control-label">Size</label>
 					<div class="slider-container">
 						<input
 							type="range"
-							bind:value={rippleSize}
-							on:input={applySettings}
+							value={settings.rippleSize}
+							on:input={(e) => updateWaterSetting('rippleSize', parseInt(e.currentTarget.value))}
 							min="20"
 							max="150"
 							class="slider"
 						/>
-						<span class="value-display">{rippleSize}</span>
+						<span class="value-display">{settings.rippleSize}</span>
 					</div>
 				</div>
 				
@@ -90,14 +63,14 @@
 					<div class="slider-container">
 						<input
 							type="range"
-							bind:value={rippleSpeed}
-							on:input={applySettings}
+							value={settings.rippleSpeed}
+							on:input={(e) => updateWaterSetting('rippleSpeed', parseFloat(e.currentTarget.value))}
 							min="0.1"
 							max="1.0"
 							step="0.05"
 							class="slider"
 						/>
-						<span class="value-display">{rippleSpeed.toFixed(2)}</span>
+						<span class="value-display">{settings.rippleSpeed.toFixed(2)}</span>
 					</div>
 				</div>
 				
@@ -106,14 +79,14 @@
 					<div class="slider-container">
 						<input
 							type="range"
-							bind:value={rippleFrequency}
-							on:input={applySettings}
+							value={10000 - settings.rippleFrequency + 1000}
+							on:input={(e) => updateWaterSetting('rippleFrequency', 10000 - parseInt(e.currentTarget.value) + 1000)}
 							min="1000"
 							max="10000"
 							step="500"
 							class="slider"
 						/>
-						<span class="value-display">{(rippleFrequency / 1000).toFixed(1)}s</span>
+						<span class="value-display">{Math.round((10000 - settings.rippleFrequency + 1000) / 1000 * 10) / 10}/10</span>
 					</div>
 				</div>
 			</div>
@@ -127,29 +100,29 @@
 			<label class="toggle-wrapper">
 				<input
 					type="checkbox"
-					bind:checked={shimmerEnabled}
-					on:change={applySettings}
+					checked={settings.shimmerEnabled}
+					on:change={(e) => updateWaterSetting('shimmerEnabled', e.currentTarget.checked)}
 					class="toggle-input"
 				/>
 				<span class="toggle-label">Enable</span>
 			</label>
 		</div>
 		
-		{#if shimmerEnabled}
+		{#if settings.shimmerEnabled}
 			<div class="controls-grid">
 				<div class="control-item">
 					<label class="control-label">Intensity</label>
 					<div class="slider-container">
 						<input
 							type="range"
-							bind:value={shimmerIntensity}
-							on:input={applySettings}
+							value={settings.shimmerIntensity}
+							on:input={(e) => updateWaterSetting('shimmerIntensity', parseFloat(e.currentTarget.value))}
 							min="0.1"
 							max="1.0"
 							step="0.05"
 							class="slider"
 						/>
-						<span class="value-display">{Math.round(shimmerIntensity * 100)}%</span>
+						<span class="value-display">{Math.round(settings.shimmerIntensity * 100)}%</span>
 					</div>
 				</div>
 				
@@ -158,14 +131,14 @@
 					<div class="slider-container">
 						<input
 							type="range"
-							bind:value={shimmerSpeed}
-							on:input={applySettings}
+							value={settings.shimmerSpeed}
+							on:input={(e) => updateWaterSetting('shimmerSpeed', parseFloat(e.currentTarget.value))}
 							min="0.5"
 							max="2.0"
 							step="0.1"
 							class="slider"
 						/>
-						<span class="value-display">{shimmerSpeed.toFixed(1)}x</span>
+						<span class="value-display">{settings.shimmerSpeed.toFixed(1)}x</span>
 					</div>
 				</div>
 				
@@ -174,13 +147,13 @@
 					<div class="slider-container">
 						<input
 							type="range"
-							bind:value={shimmerCount}
-							on:input={applySettings}
+							value={settings.shimmerCount}
+							on:input={(e) => updateWaterSetting('shimmerCount', parseInt(e.currentTarget.value))}
 							min="1"
 							max="10"
 							class="slider"
 						/>
-						<span class="value-display">{shimmerCount}</span>
+						<span class="value-display">{settings.shimmerCount}</span>
 					</div>
 				</div>
 			</div>

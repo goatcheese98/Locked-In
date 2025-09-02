@@ -18,9 +18,10 @@ import type { Ripple, RippleType } from '../types';
  * @param y - The y-coordinate for the ripple's center.
  * @param type - The type of interaction or event causing the ripple (e.g., 'mouseMove', 'ambient').
  *               This determines the ripple's appearance and behavior from `RIPPLE_CONFIG`.
+ * @param settings - Optional settings to override default ripple parameters.
  * @throws Error if an unknown ripple type is provided.
  */
-export function createRipple(x: number, y: number, type: RippleType): void {
+export function createRipple(x: number, y: number, type: RippleType, settings?: any): void {
 	const config = RIPPLE_CONFIG[type];
 	if (!config) {
 		// Defensive coding: ensure a configuration exists for the given type.
@@ -28,13 +29,23 @@ export function createRipple(x: number, y: number, type: RippleType): void {
 		throw new Error(`Unknown ripple type: ${type}`);
 	}
 
-	let rippleSpeed = config.speed;
-	let rippleMaxRadius = config.maxRadius;
+	// Use dynamic settings if provided, otherwise fall back to config defaults
+	let baseSpeed = config.speed;
+	let baseMaxRadius = config.maxRadius;
+	
+	// Apply settings overrides for mouse move ripples
+	if (type === 'mouseMove' && settings) {
+		baseSpeed = settings.rippleSpeed || config.speed;
+		baseMaxRadius = settings.rippleSize || config.maxRadius;
+	}
+	
+	let rippleSpeed = baseSpeed;
+	let rippleMaxRadius = baseMaxRadius;
 
 	// Apply slight randomization to user-initiated ripples for a more natural look.
 	if (type === 'mouseMove' || type === 'click') {
-		rippleSpeed = config.speed * (0.9 + Math.random() * 0.2);
-		rippleMaxRadius = config.maxRadius * (0.9 + Math.random() * 0.2);
+		rippleSpeed = baseSpeed * (0.9 + Math.random() * 0.2);
+		rippleMaxRadius = baseMaxRadius * (0.9 + Math.random() * 0.2);
 	}
 
 	// Add the configured ripple to the animation state.

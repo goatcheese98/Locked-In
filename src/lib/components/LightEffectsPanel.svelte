@@ -53,7 +53,7 @@
         type="range"
         class="slider yellow-slider"
         min="50"
-        max="300"
+        max="500"
         step="10"
         value={settings.sunGlowSize}
         on:input={(e) => updateLightSetting('sunGlowSize', parseInt(e.currentTarget.value))}
@@ -75,86 +75,56 @@
         on:input={(e) => updateLightSetting('sunGlowBlur', parseInt(e.currentTarget.value))}
       />
     </div>
+    
+    <div class="control-group">
+      <label class="control-label">
+        <span>Pulse Speed</span>
+        <span class="value">{Math.round(settings.sunGlowPulseSpeed * 1000)}‰</span>
+      </label>
+      <input
+        type="range"
+        class="slider yellow-slider"
+        min="0.0005"
+        max="0.005"
+        step="0.0005"
+        value={settings.sunGlowPulseSpeed}
+        on:input={(e) => updateLightSetting('sunGlowPulseSpeed', parseFloat(e.currentTarget.value))}
+      />
+    </div>
+    
+    <div class="control-group">
+      <label class="control-label">
+        <span>Sun Glint Intensity</span>
+        <span class="value">{Math.round(settings.sunGlintIntensity * 100)}%</span>
+      </label>
+      <input
+        type="range"
+        class="slider yellow-slider"
+        min="0"
+        max="1"
+        step="0.1"
+        value={settings.sunGlintIntensity}
+        on:input={(e) => updateLightSetting('sunGlintIntensity', parseFloat(e.currentTarget.value))}
+      />
+    </div>
+    
+    <div class="control-group">
+      <label class="control-label">
+        <span>Sun Glint Quantity</span>
+        <span class="value">{Math.round(settings.sunGlintQuantity * 100)}%</span>
+      </label>
+      <input
+        type="range"
+        class="slider yellow-slider"
+        min="0"
+        max="2"
+        step="0.1"
+        value={settings.sunGlintQuantity}
+        on:input={(e) => updateLightSetting('sunGlintQuantity', parseFloat(e.currentTarget.value))}
+      />
+    </div>
   </div>
   
-  <!-- Glints -->
-  <div class="effect-section">
-    <div class="section-header">
-      <h4 class="section-title">Glints</h4>
-      <label class="toggle">
-        <input 
-          type="checkbox" 
-          checked={settings.glintsEnabled}
-          on:change={(e) => updateLightSetting('glintsEnabled', e.currentTarget.checked)}
-        />
-        <span class="toggle-slider"></span>
-      </label>
-    </div>
-    
-    <div class="control-group">
-      <label class="control-label">
-        <span>Frequency</span>
-        <span class="value">{settings.glintFrequency}</span>
-      </label>
-      <input
-        type="range"
-        class="slider yellow-slider"
-        min="5"
-        max="50"
-        step="5"
-        value={settings.glintFrequency}
-        on:input={(e) => updateLightSetting('glintFrequency', parseInt(e.currentTarget.value))}
-      />
-    </div>
-    
-    <div class="control-group">
-      <label class="control-label">
-        <span>Brightness</span>
-        <span class="value">{Math.round(settings.glintBrightness * 100)}%</span>
-      </label>
-      <input
-        type="range"
-        class="slider yellow-slider"
-        min="0.5"
-        max="1"
-        step="0.05"
-        value={settings.glintBrightness}
-        on:input={(e) => updateLightSetting('glintBrightness', parseFloat(e.currentTarget.value))}
-      />
-    </div>
-    
-    <div class="control-group">
-      <label class="control-label">
-        <span>Duration</span>
-        <span class="value">{settings.glintDuration}ms</span>
-      </label>
-      <input
-        type="range"
-        class="slider yellow-slider"
-        min="100"
-        max="1000"
-        step="50"
-        value={settings.glintDuration}
-        on:input={(e) => updateLightSetting('glintDuration', parseInt(e.currentTarget.value))}
-      />
-    </div>
-    
-    <div class="control-group">
-      <label class="control-label">
-        <span>Size</span>
-        <span class="value">{settings.glintSize}px</span>
-      </label>
-      <input
-        type="range"
-        class="slider yellow-slider"
-        min="2"
-        max="8"
-        step="0.5"
-        value={settings.glintSize}
-        on:input={(e) => updateLightSetting('glintSize', parseFloat(e.currentTarget.value))}
-      />
-    </div>
-  </div>
 </div>
 
 <style>

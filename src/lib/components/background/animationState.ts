@@ -477,6 +477,26 @@ export function releaseFoamStreak(streakToRelease: FoamStreak): void {
 	}
 }
 
+/**
+ * Releases a water grain back to the inactive pool for reuse.
+ * Finds the grain in the active list, removes it, and adds it to the inactive pool.
+ *
+ * @param grainToRelease - The water grain object to release.
+ */
+export function releaseWaterGrain(grainToRelease: WaterGrain): void {
+	const index = activeWaterGrains.findIndex((wg) => wg.id === grainToRelease.id);
+	if (index !== -1) {
+		const releasedGrain = activeWaterGrains.splice(index, 1)[0];
+		if (releasedGrain) {
+			inactiveWaterGrains.push(releasedGrain);
+		}
+	} else {
+		console.warn(
+			`Attempted to release waterGrain with ID ${grainToRelease.id} not found in active list.`
+		);
+	}
+}
+
 // Note: Direct array modification functions (like updateRipples, removeRippleById)
 // were considered but are currently avoided to enforce state changes through the
 // defined add/release patterns, which helps manage object pooling.

@@ -52,7 +52,7 @@ import {
  * @param canvasWidth - The current width of the canvas.
  * @param canvasHeight - The current height of the canvas.
  */
-export function createFoamStreak(canvasWidth: number, canvasHeight: number): void {
+export function createFoamStreak(canvasWidth: number, canvasHeight: number, settings?: any): void {
 	if (getFoamStreaks().length >= MAX_FOAM_STREAKS) return;
 
 	const startSide = Math.floor(Math.random() * 3); // 0: Top, 1: Left, 2: Right
@@ -87,6 +87,11 @@ export function createFoamStreak(canvasWidth: number, canvasHeight: number): voi
 		initialVy = (Math.random() - 0.5) * FOAM_STREAK_DRIFT_Y_MAX * 0.4;
 		baseAngle = Math.PI + (Math.random() - 0.5) * (Math.PI / 4);
 	}
+
+	// Apply animation speed multiplier to velocities
+	const speedMultiplier = settings?.foamAnimationSpeed || 1.0;
+	initialVx *= speedMultiplier;
+	initialVy *= speedMultiplier;
 
 	let particleAppearCounter = 0;
 
@@ -167,10 +172,11 @@ export function createFoamStreak(canvasWidth: number, canvasHeight: number): voi
 			currentX = nextX;
 			currentY = nextY;
 
-			// Chance to create a sub-branch
+			// Chance to create a sub-branch using dynamic branchiness
+			const branchChance = settings?.foamBranchiness || FOAM_BRANCH_CHANCE;
 			if (
 				!isSubBranch &&
-				Math.random() < FOAM_BRANCH_CHANCE &&
+				Math.random() < branchChance &&
 				i < numSegments - FOAM_SUB_BRANCH_MAX_SEGMENTS / 2 &&
 				i > 2
 			) {
@@ -197,15 +203,21 @@ export function createFoamStreak(canvasWidth: number, canvasHeight: number): voi
 		}
 	};
 
-	// Generate the main path
-	const mainPathSegments =
-		FOAM_STREAK_MAIN_PATH_SEGMENTS_MIN +
-		Math.floor(
-			Math.random() * (FOAM_STREAK_MAIN_PATH_SEGMENTS_MAX - FOAM_STREAK_MAIN_PATH_SEGMENTS_MIN + 1)
-		);
+	// Generate the main path using dynamic complexity setting
+	const complexityMultiplier = settings?.foamComplexity ? settings.foamComplexity / 50 : 1; // 50 is default complexity
+	const minSegments = Math.round(FOAM_STREAK_MAIN_PATH_SEGMENTS_MIN * complexityMultiplier);
+	const maxSegments = Math.round(FOAM_STREAK_MAIN_PATH_SEGMENTS_MAX * complexityMultiplier);
+	const mainPathSegments = minSegments + Math.floor(Math.random() * (maxSegments - minSegments + 1));
 	// Note: generatePathParticles is now called after the streak is added below
 
 	// Create the streak object itself (particles array is initially empty)
+	// Adjust lifetime inversely to animation speed - slower streaks live longer
+	const baseMaxAge = settings?.foamLifetime || (
+		FOAM_STREAK_LIFESPAN_MIN +
+		Math.random() * (FOAM_STREAK_LIFESPAN_MAX - FOAM_STREAK_LIFESPAN_MIN)
+	);
+	const adjustedMaxAge = Math.round(baseMaxAge / speedMultiplier);
+	
 	const newStreakProps = {
 		anchorX: initialAnchorX,
 		anchorY: initialAnchorY,
@@ -214,9 +226,7 @@ export function createFoamStreak(canvasWidth: number, canvasHeight: number): voi
 		vy: initialVy,
 		opacity: 0, // Start invisible
 		age: 0,
-		maxAge:
-			FOAM_STREAK_LIFESPAN_MIN +
-			Math.random() * (FOAM_STREAK_LIFESPAN_MAX - FOAM_STREAK_LIFESPAN_MIN),
+		maxAge: adjustedMaxAge,
 		color: Math.random() < 0.6 ? FOAM_STREAK_COLOR_PRIMARY : FOAM_STREAK_COLOR_SECONDARY
 	};
 
@@ -255,7 +265,8 @@ export function createFoamStreak(canvasWidth: number, canvasHeight: number): voi
 export function updateAndDrawFoamStreaks(
 	ctx: CanvasRenderingContext2D,
 	canvasWidth: number,
-	canvasHeight: number
+	canvasHeight: number,
+	settings?: any
 ): void {
 	const currentFoamStreaks: FoamStreak[] = getFoamStreaks();
 	if (currentFoamStreaks.length === 0) return;
@@ -389,7 +400,8 @@ export function updateAndDrawFoamStreaks(
 			// Draw particle
 			const finalX = streak.anchorX + particle.x;
 			const finalY = streak.anchorY + particle.y;
-			const combinedOpacity = streak.opacity * particle.opacity;
+			const opacityMultiplier = settings?.foamOpacity ?? 1;
+			const combinedOpacity = streak.opacity * particle.opacity * opacityMultiplier;
 			if (combinedOpacity <= 0.001) continue;
 			ctx.globalAlpha = combinedOpacity * originalGlobalAlpha;
 			ctx.beginPath();

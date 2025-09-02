@@ -30,8 +30,7 @@
 
 <!-- Interactive Background -->
 <InteractiveBackground 
-	gradientColor1={$backgroundSettings.gradientColor1} 
-	gradientColor2={$backgroundSettings.gradientColor2} 
+	settings={$backgroundSettings}
 />
 
 <!-- Floating Dock -->

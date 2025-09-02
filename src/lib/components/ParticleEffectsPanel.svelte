@@ -1,60 +1,29 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
+	import { backgroundSettings } from '$lib/stores/backgroundSettingsStore';
 	
-	const dispatch = createEventDispatcher();
+	$: settings = $backgroundSettings;
 	
-	// Water Grains Settings
-	let waterGrainsEnabled = true;
-	let grainDensity = 600; // Number of particles
-	let grainSpeed = 0.15; // Average speed
-	let grainSize = 0.875; // Average size
-	let grainOpacity = 0.4; // Average opacity
-	
-	// Foam Streaks Settings
-	let foamEnabled = true;
-	let foamFrequency = 0.02; // Chance per frame
-	let foamLifetime = 120; // Average lifetime in frames
-	let foamComplexity = 50; // Average path segments
-	let foamBranchiness = 0.25; // Branch probability
-	let foamOpacity = 0.7;
-	
-	// Apply settings
-	function applySettings() {
-		dispatch('update', {
-			waterGrains: {
-				enabled: waterGrainsEnabled,
-				density: grainDensity,
-				speed: grainSpeed,
-				size: grainSize,
-				opacity: grainOpacity
-			},
-			foam: {
-				enabled: foamEnabled,
-				frequency: foamFrequency,
-				lifetime: foamLifetime,
-				complexity: foamComplexity,
-				branchiness: foamBranchiness,
-				opacity: foamOpacity
-			}
-		});
+	function updateParticleSetting(key: string, value: any) {
+		backgroundSettings.update(s => ({
+			...s,
+			[key]: value
+		}));
 	}
 	
 	// Reset to defaults
 	function resetDefaults() {
-		waterGrainsEnabled = true;
-		grainDensity = 600;
-		grainSpeed = 0.15;
-		grainSize = 0.875;
-		grainOpacity = 0.4;
-		
-		foamEnabled = true;
-		foamFrequency = 0.02;
-		foamLifetime = 120;
-		foamComplexity = 50;
-		foamBranchiness = 0.25;
-		foamOpacity = 0.7;
-		
-		applySettings();
+		updateParticleSetting('waterGrainsEnabled', true);
+		updateParticleSetting('grainDensity', 600);
+		updateParticleSetting('grainSpeed', 0.15);
+		updateParticleSetting('grainSize', 0.875);
+		updateParticleSetting('grainOpacity', 0.4);
+		updateParticleSetting('foamEnabled', true);
+		updateParticleSetting('foamFrequency', 0.02);
+		updateParticleSetting('foamLifetime', 750);
+		updateParticleSetting('foamComplexity', 50);
+		updateParticleSetting('foamBranchiness', 0.25);
+		updateParticleSetting('foamAnimationSpeed', 1.0);
+		updateParticleSetting('foamOpacity', 0.7);
 	}
 </script>
 
@@ -68,15 +37,15 @@
 			<label class="toggle-wrapper">
 				<input
 					type="checkbox"
-					bind:checked={waterGrainsEnabled}
-					on:change={applySettings}
+					checked={settings.waterGrainsEnabled}
+					on:change={(e) => updateParticleSetting('waterGrainsEnabled', e.currentTarget.checked)}
 					class="toggle-input"
 				/>
 				<span class="toggle-label">Enable</span>
 			</label>
 		</div>
 		
-		{#if waterGrainsEnabled}
+		{#if settings.waterGrainsEnabled}
 			<div class="controls-grid">
 				<div class="control-item">
 					<label for="grain-density" class="control-label">Density</label>
@@ -84,14 +53,14 @@
 						<input
 							id="grain-density"
 							type="range"
-							bind:value={grainDensity}
-							on:input={applySettings}
+							value={settings.grainDensity}
+							on:input={(e) => updateParticleSetting('grainDensity', parseInt(e.currentTarget.value))}
 							min="100"
 							max="1200"
 							step="50"
 							class="slider"
 						/>
-						<span class="value-display">{grainDensity}</span>
+						<span class="value-display">{settings.grainDensity}</span>
 					</div>
 				</div>
 				
@@ -101,14 +70,14 @@
 						<input
 							id="grain-speed"
 							type="range"
-							bind:value={grainSpeed}
-							on:input={applySettings}
+							value={settings.grainSpeed}
+							on:input={(e) => updateParticleSetting('grainSpeed', parseFloat(e.currentTarget.value))}
 							min="0.05"
 							max="0.25"
 							step="0.01"
 							class="slider"
 						/>
-						<span class="value-display">{grainSpeed.toFixed(2)}</span>
+						<span class="value-display">{settings.grainSpeed.toFixed(2)}</span>
 					</div>
 				</div>
 				
@@ -118,14 +87,14 @@
 						<input
 							id="grain-size"
 							type="range"
-							bind:value={grainSize}
-							on:input={applySettings}
+							value={settings.grainSize}
+							on:input={(e) => updateParticleSetting('grainSize', parseFloat(e.currentTarget.value))}
 							min="0.5"
 							max="1.25"
 							step="0.05"
 							class="slider"
 						/>
-						<span class="value-display">{grainSize.toFixed(2)}</span>
+						<span class="value-display">{settings.grainSize.toFixed(2)}</span>
 					</div>
 				</div>
 				
@@ -135,14 +104,31 @@
 						<input
 							id="grain-opacity"
 							type="range"
-							bind:value={grainOpacity}
-							on:input={applySettings}
+							value={settings.grainOpacity}
+							on:input={(e) => updateParticleSetting('grainOpacity', parseFloat(e.currentTarget.value))}
 							min="0.1"
 							max="0.8"
 							step="0.05"
 							class="slider"
 						/>
-						<span class="value-display">{Math.round(grainOpacity * 100)}%</span>
+						<span class="value-display">{Math.round(settings.grainOpacity * 100)}%</span>
+					</div>
+				</div>
+				
+				<div class="control-item">
+					<label for="grain-lightness" class="control-label">Lightness</label>
+					<div class="slider-container">
+						<input
+							id="grain-lightness"
+							type="range"
+							value={settings.grainLightness}
+							on:input={(e) => updateParticleSetting('grainLightness', parseInt(e.currentTarget.value))}
+							min="20"
+							max="90"
+							step="5"
+							class="slider"
+						/>
+						<span class="value-display">{settings.grainLightness}%</span>
 					</div>
 				</div>
 			</div>
@@ -156,15 +142,15 @@
 			<label class="toggle-wrapper">
 				<input
 					type="checkbox"
-					bind:checked={foamEnabled}
-					on:change={applySettings}
+					checked={settings.foamEnabled}
+					on:change={(e) => updateParticleSetting('foamEnabled', e.currentTarget.checked)}
 					class="toggle-input"
 				/>
 				<span class="toggle-label">Enable</span>
 			</label>
 		</div>
 		
-		{#if foamEnabled}
+		{#if settings.foamEnabled}
 			<div class="controls-grid">
 				<div class="control-item">
 					<label for="foam-frequency" class="control-label">Frequency</label>
@@ -172,14 +158,14 @@
 						<input
 							id="foam-frequency"
 							type="range"
-							bind:value={foamFrequency}
-							on:input={applySettings}
+							value={settings.foamFrequency}
+							on:input={(e) => updateParticleSetting('foamFrequency', parseFloat(e.currentTarget.value))}
 							min="0.005"
-							max="0.05"
+							max="0.15"
 							step="0.005"
 							class="slider"
 						/>
-						<span class="value-display">{(foamFrequency * 100).toFixed(1)}%</span>
+						<span class="value-display">{(settings.foamFrequency * 100).toFixed(1)}%</span>
 					</div>
 				</div>
 				
@@ -189,14 +175,14 @@
 						<input
 							id="foam-lifetime"
 							type="range"
-							bind:value={foamLifetime}
-							on:input={applySettings}
-							min="60"
-							max="200"
-							step="10"
+							value={settings.foamLifetime}
+							on:input={(e) => updateParticleSetting('foamLifetime', parseInt(e.currentTarget.value))}
+							min="300"
+							max="1200"
+							step="50"
 							class="slider"
 						/>
-						<span class="value-display">{(foamLifetime / 60).toFixed(1)}s</span>
+						<span class="value-display">{(settings.foamLifetime / 60).toFixed(1)}s</span>
 					</div>
 				</div>
 				
@@ -206,14 +192,14 @@
 						<input
 							id="foam-complexity"
 							type="range"
-							bind:value={foamComplexity}
-							on:input={applySettings}
+							value={settings.foamComplexity}
+							on:input={(e) => updateParticleSetting('foamComplexity', parseInt(e.currentTarget.value))}
 							min="25"
 							max="100"
 							step="5"
 							class="slider"
 						/>
-						<span class="value-display">{foamComplexity}</span>
+						<span class="value-display">{settings.foamComplexity}</span>
 					</div>
 				</div>
 				
@@ -223,14 +209,31 @@
 						<input
 							id="foam-branchiness"
 							type="range"
-							bind:value={foamBranchiness}
-							on:input={applySettings}
+							value={settings.foamBranchiness}
+							on:input={(e) => updateParticleSetting('foamBranchiness', parseFloat(e.currentTarget.value))}
 							min="0"
 							max="0.5"
 							step="0.05"
 							class="slider"
 						/>
-						<span class="value-display">{Math.round(foamBranchiness * 100)}%</span>
+						<span class="value-display">{Math.round(settings.foamBranchiness * 100)}%</span>
+					</div>
+				</div>
+				
+				<div class="control-item">
+					<label for="foam-animation-speed" class="control-label">Animation Speed</label>
+					<div class="slider-container">
+						<input
+							id="foam-animation-speed"
+							type="range"
+							value={settings.foamAnimationSpeed || 1.0}
+							on:input={(e) => updateParticleSetting('foamAnimationSpeed', parseFloat(e.currentTarget.value))}
+							min="0.2"
+							max="3.0"
+							step="0.1"
+							class="slider"
+						/>
+						<span class="value-display">{(settings.foamAnimationSpeed || 1.0).toFixed(1)}x</span>
 					</div>
 				</div>
 				
@@ -240,14 +243,14 @@
 						<input
 							id="foam-opacity"
 							type="range"
-							bind:value={foamOpacity}
-							on:input={applySettings}
+							value={settings.foamOpacity}
+							on:input={(e) => updateParticleSetting('foamOpacity', parseFloat(e.currentTarget.value))}
 							min="0.3"
 							max="1.0"
 							step="0.05"
 							class="slider"
 						/>
-						<span class="value-display">{Math.round(foamOpacity * 100)}%</span>
+						<span class="value-display">{Math.round(settings.foamOpacity * 100)}%</span>
 					</div>
 				</div>
 			</div>

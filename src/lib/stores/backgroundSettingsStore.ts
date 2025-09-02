@@ -1,4 +1,10 @@
 import { writable, get } from 'svelte/store';
+import { 
+	DEFAULT_LIGHT_EFFECTS, 
+	DEFAULT_WATER_EFFECTS, 
+	DEFAULT_PARTICLE_EFFECTS, 
+	DEFAULT_GRADIENT_SETTINGS 
+} from '$lib/config/defaultSettings';
 
 const MAX_HISTORY_SIZE = 20;
 
@@ -12,38 +18,86 @@ export interface BackgroundSettings {
 	gradientColor2HistoryIndex: number;
 	isAutoCyclingColor1: boolean;
 	isAutoCyclingColor2: boolean;
+	
 	// Light Effects
 	sunGlowEnabled: boolean;
 	sunGlowIntensity: number;
 	sunGlowSize: number;
 	sunGlowBlur: number;
-	glintsEnabled: boolean;
-	glintFrequency: number;
-	glintBrightness: number;
-	glintDuration: number;
-	glintSize: number;
+	sunGlowPulseSpeed: number;
+	sunGlintIntensity: number;
+	sunGlintQuantity: number;
+	
+	// Water Effects
+	ripplesEnabled: boolean;
+	rippleSize: number;
+	rippleSpeed: number;
+	rippleFrequency: number;
+	shimmerEnabled: boolean;
+	shimmerIntensity: number;
+	shimmerSpeed: number;
+	shimmerCount: number;
+	
+	// Particle Effects
+	waterGrainsEnabled: boolean;
+	grainDensity: number;
+	grainSpeed: number;
+	grainSize: number;
+	grainOpacity: number;
+	grainLightness: number;
+	foamEnabled: boolean;
+	foamFrequency: number;
+	foamLifetime: number;
+	foamComplexity: number;
+	foamBranchiness: number;
+	foamAnimationSpeed: number;
+	foamOpacity: number;
 }
 
 const defaultBackgroundSettings: BackgroundSettings = {
-	gradientColor1: 'hsl(210, 70%, 50%)',
-	gradientColor2: 'hsl(200, 68%, 50%)',
+	gradientColor1: DEFAULT_GRADIENT_SETTINGS.color1,
+	gradientColor2: DEFAULT_GRADIENT_SETTINGS.color2,
 	isFloatingEnabled: true,
-	gradientColor1History: ['hsl(210, 70%, 50%)'],
+	gradientColor1History: [DEFAULT_GRADIENT_SETTINGS.color1],
 	gradientColor1HistoryIndex: 0,
-	gradientColor2History: ['hsl(200, 68%, 50%)'],
+	gradientColor2History: [DEFAULT_GRADIENT_SETTINGS.color2],
 	gradientColor2HistoryIndex: 0,
 	isAutoCyclingColor1: false,
 	isAutoCyclingColor2: false,
+	
 	// Light Effects defaults
-	sunGlowEnabled: true,
-	sunGlowIntensity: 0.7,
-	sunGlowSize: 150,
-	sunGlowBlur: 60,
-	glintsEnabled: true,
-	glintFrequency: 20,
-	glintBrightness: 0.8,
-	glintDuration: 500,
-	glintSize: 4
+	sunGlowEnabled: DEFAULT_LIGHT_EFFECTS.sunGlow.enabled,
+	sunGlowIntensity: DEFAULT_LIGHT_EFFECTS.sunGlow.intensity,
+	sunGlowSize: DEFAULT_LIGHT_EFFECTS.sunGlow.size,
+	sunGlowBlur: DEFAULT_LIGHT_EFFECTS.sunGlow.blur,
+	sunGlowPulseSpeed: DEFAULT_LIGHT_EFFECTS.sunGlow.pulseSpeed,
+	sunGlintIntensity: DEFAULT_LIGHT_EFFECTS.sunGlow.glintIntensity,
+	sunGlintQuantity: DEFAULT_LIGHT_EFFECTS.sunGlow.glintQuantity,
+	
+	// Water Effects defaults
+	ripplesEnabled: DEFAULT_WATER_EFFECTS.ripples.enabled,
+	rippleSize: DEFAULT_WATER_EFFECTS.ripples.mouseMove.maxRadius,
+	rippleSpeed: DEFAULT_WATER_EFFECTS.ripples.mouseMove.speed,
+	rippleFrequency: DEFAULT_WATER_EFFECTS.ripples.ambient.interval,
+	shimmerEnabled: DEFAULT_WATER_EFFECTS.shimmer.enabled,
+	shimmerIntensity: DEFAULT_WATER_EFFECTS.shimmer.maxOpacity,
+	shimmerSpeed: DEFAULT_WATER_EFFECTS.shimmer.maxSpeedFactor,
+	shimmerCount: DEFAULT_WATER_EFFECTS.shimmer.waveSpots,
+	
+	// Particle Effects defaults
+	waterGrainsEnabled: DEFAULT_PARTICLE_EFFECTS.waterGrains.enabled,
+	grainDensity: DEFAULT_PARTICLE_EFFECTS.waterGrains.count,
+	grainSpeed: (DEFAULT_PARTICLE_EFFECTS.waterGrains.minSpeed + DEFAULT_PARTICLE_EFFECTS.waterGrains.maxSpeed) / 2,
+	grainSize: (DEFAULT_PARTICLE_EFFECTS.waterGrains.minSize + DEFAULT_PARTICLE_EFFECTS.waterGrains.maxSize) / 2,
+	grainOpacity: (DEFAULT_PARTICLE_EFFECTS.waterGrains.minOpacity + DEFAULT_PARTICLE_EFFECTS.waterGrains.maxOpacity) / 2,
+	grainLightness: DEFAULT_PARTICLE_EFFECTS.waterGrains.lightness,
+	foamEnabled: DEFAULT_PARTICLE_EFFECTS.foamStreaks.enabled,
+	foamFrequency: DEFAULT_PARTICLE_EFFECTS.foamStreaks.chancePerFrame,
+	foamLifetime: 750, // Default to 12.5 seconds (750/60)
+	foamComplexity: (DEFAULT_PARTICLE_EFFECTS.foamStreaks.streak.mainPathSegmentsMin + DEFAULT_PARTICLE_EFFECTS.foamStreaks.streak.mainPathSegmentsMax) / 2,
+	foamBranchiness: DEFAULT_PARTICLE_EFFECTS.foamStreaks.streak.branchChance,
+	foamAnimationSpeed: 1.0,
+	foamOpacity: 0.7
 };
 
 function generateRandomHslColor(options?: { maxLightness?: number }): string {

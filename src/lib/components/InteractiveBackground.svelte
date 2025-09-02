@@ -3,7 +3,6 @@
 	import type {
 		Ripple,
 		ShimmerSpot,
-		Glint,
 		SunGlow,
 		SunGlint,
 		RareSighting,
@@ -15,8 +14,6 @@
 		RIPPLE_CONFIG,
 		AMBIENT_RIPPLE_INTERVAL,
 		MAX_SHIMMER_SPOTS,
-		MAX_GLINTS,
-		GLINT_CHANCE,
 		MOUSE_MOVE_THROTTLE,
 		LONG_PRESS_DURATION,
 		LONG_PRESS_MOVE_THRESHOLD,
@@ -93,7 +90,8 @@
 		getSunGlints,
 		getRareSightings,
 		getWaterGrains,
-		getFoamStreaks
+		getFoamStreaks,
+		releaseWaterGrain
 	} from './background/animationState';
 	import { createRipple, updateAndDrawRipples } from './background/effects/ripples';
 	import {
@@ -108,10 +106,6 @@
 		handleResizeSunGlows
 	} from './background/effects/sunGlow';
 	import {
-		createGlint as createGlintEffect,
-		updateAndDrawGlints as updateAndDrawGlintsEffect
-	} from './background/effects/glints';
-	import {
 		createRareSighting as createRareSightingEffect,
 		updateAndDrawRareSightings as updateAndDrawRareSightingsEffect
 	} from './background/effects/rareSightings';
@@ -125,8 +119,13 @@
 		updateAndDrawFoamStreaks as updateAndDrawFoamStreaksEffect
 	} from './background/effects/foamStreaks';
 
-	export let gradientColor1: string = 'hsl(210, 70%, 50%)'; // Default Color 1
-	export let gradientColor2: string = 'hsl(200, 68%, 50%)'; // Default Color 2
+	import { backgroundSettings, type BackgroundSettings } from '$lib/stores/backgroundSettingsStore';
+	
+	export let settings: BackgroundSettings;
+	
+	// Extract gradient colors from settings with fallbacks
+	$: gradientColor1 = settings?.gradientColor1 || 'hsl(210, 70%, 50%)';
+	$: gradientColor2 = settings?.gradientColor2 || 'hsl(200, 68%, 50%)';
 
 	let canvasRef: HTMLCanvasElement;
 	// To help TypeScript and linters, we'll use local non-null vars inside functions after checks
@@ -297,12 +296,12 @@
 					}
 				}
 
+				// Create ripples during drag regardless of threshold status
 				const n = Date.now();
 				if (n - lastMouseMoveTime > MOUSE_MOVE_THROTTLE) {
-					createRipple(event.pageX, event.pageY, 'mouseMove');
+					createRipple(event.pageX, event.pageY, 'mouseMove', $backgroundSettings);
 					lastMouseMoveTime = n;
 				}
-			} else {
 			}
 		};
 
@@ -320,9 +319,9 @@
 			const pressDuration = Date.now() - mouseDownTime;
 			if (!isDraggingBeyondThreshold) {
 				if (pressDuration >= LONG_PRESS_DURATION) {
-					createRipple(event.pageX, event.pageY, 'longPress');
+					createRipple(event.pageX, event.pageY, 'longPress', $backgroundSettings);
 				} else {
-					createRipple(event.pageX, event.pageY, 'mouseMove');
+					createRipple(event.pageX, event.pageY, 'mouseMove', $backgroundSettings);
 				}
 			}
 
@@ -333,7 +332,8 @@
 
 		const tryCreateAmbientRipple = () => {
 			if (!canvas) return;
-			createRipple(Math.random() * canvas.width, Math.random() * canvas.height, 'ambient');
+			// For now, always create ripples to test
+			createRipple(Math.random() * canvas.width, Math.random() * canvas.height, 'ambient', settings);
 		};
 
 		// --- Setup & Animation Loop ---
@@ -358,22 +358,30 @@
 		window.addEventListener('mousedown', handleMouseDown);
 		window.addEventListener('mouseup', handleMouseUp);
 
+		// Set up initial ambient ripple interval
 		if (typeof window !== 'undefined') {
-			ambientRippleIntervalId = window.setInterval(tryCreateAmbientRipple, AMBIENT_RIPPLE_INTERVAL);
+			const rippleInterval = settings?.rippleFrequency || AMBIENT_RIPPLE_INTERVAL;
+			ambientRippleIntervalId = window.setInterval(tryCreateAmbientRipple, rippleInterval);
 		}
 
 		// Initialize effects
 		// Use the imported createShimmerSpot and pass canvas dimensions
 		if (canvas) {
-			// Ensure canvas is available
-			for (let k = 0; k < MAX_SHIMMER_SPOTS - NUM_WAVE_SHIMMER_SPOTS; k++)
-				createShimmerSpot(canvas.width, canvas.height, false);
-			for (let k = 0; k < NUM_WAVE_SHIMMER_SPOTS; k++)
-				createShimmerSpot(canvas.width, canvas.height, true);
-			// Use the imported createSunGlowEffect
-			createSunGlowEffect(canvas.width, canvas.height);
-			// Use the imported initializeWaterGrainsEffect
-			initializeWaterGrainsEffect(canvas.width, canvas.height);
+			// Initialize shimmer spots (only if enabled)
+			if (settings?.shimmerEnabled) {
+				for (let k = 0; k < MAX_SHIMMER_SPOTS - NUM_WAVE_SHIMMER_SPOTS; k++)
+					createShimmerSpot(canvas.width, canvas.height, false);
+				for (let k = 0; k < NUM_WAVE_SHIMMER_SPOTS; k++)
+					createShimmerSpot(canvas.width, canvas.height, true);
+			}
+			// Use the imported createSunGlowEffect (only if enabled)
+			if (settings?.sunGlowEnabled) {
+				createSunGlowEffect(canvas.width, canvas.height);
+			}
+			// Use the imported initializeWaterGrainsEffect (only if enabled)
+			if (settings?.waterGrainsEnabled) {
+				initializeWaterGrainsEffect(canvas.width, canvas.height, settings);
+			}
 		}
 
 		console.log(
@@ -408,12 +416,23 @@
 			ctx.fillRect(0, 0, canvas.width, canvas.height);
 			// ---
 
-			updateAndDrawRipples(ctx);
-			updateAndDrawShimmerSpots(ctx, canvas.width, canvas.height, globalTime); // Call new function
-			// Call imported water grain update function
-			updateAndDrawWaterGrainsEffect(ctx, canvas.width, canvas.height);
-			updateAndDrawSunGlows(ctx);
-			updateAndDrawSunGlints(ctx);
+			// Update and draw ripples (only if enabled)
+			if (settings?.ripplesEnabled) {
+				updateAndDrawRipples(ctx);
+			}
+			// Update and draw shimmer spots (only if enabled)
+			if (settings?.shimmerEnabled) {
+				updateAndDrawShimmerSpots(ctx, canvas.width, canvas.height, globalTime);
+			}
+			// Call imported water grain update function (only if enabled)
+			if (settings?.waterGrainsEnabled) {
+				updateAndDrawWaterGrainsEffect(ctx, canvas.width, canvas.height, settings);
+			}
+			// Only update sun effects if enabled
+			if (settings?.sunGlowEnabled) {
+				updateAndDrawSunGlows(ctx, settings);
+				updateAndDrawSunGlints(ctx);
+			}
 
 			const FRAME_TIME_MS = 16.67;
 			timeSinceLastSightingAttempt += FRAME_TIME_MS;
@@ -436,20 +455,19 @@
 			// Use imported function
 			updateAndDrawRareSightingsEffect(ctx, canvas.width, canvas.height);
 
-			if (Math.random() < GLINT_CHANCE) createGlintEffect(canvas.width, canvas.height);
-			const ripplesFromGlints = updateAndDrawGlintsEffect(ctx);
-			ripplesFromGlints.forEach((pos) => createRipple(pos.x, pos.y, 'glintExpire'));
 
-			// Foam streak creation
-			if (
-				Math.random() < FOAM_STREAK_CHANCE_PER_FRAME &&
-				getFoamStreaks().length < MAX_FOAM_STREAKS
-			) {
-				// Use imported function
-				createFoamStreakEffect(canvas.width, canvas.height);
+			// Foam streak creation (only if enabled)
+			if (settings?.foamEnabled) {
+				if (
+					Math.random() < (settings?.foamFrequency || FOAM_STREAK_CHANCE_PER_FRAME) &&
+					getFoamStreaks().length < MAX_FOAM_STREAKS
+				) {
+					// Use imported function with settings
+					createFoamStreakEffect(canvas.width, canvas.height, settings);
+				}
+				// Update/Draw Foam Streaks with settings
+				updateAndDrawFoamStreaksEffect(ctx, canvas.width, canvas.height, settings);
 			}
-			// Update/Draw Foam Streaks
-			updateAndDrawFoamStreaksEffect(ctx, canvas.width, canvas.height);
 
 			animationFrameId = requestAnimationFrame(animate);
 		}
