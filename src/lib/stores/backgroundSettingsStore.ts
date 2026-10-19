@@ -1,9 +1,9 @@
 import { writable, get } from 'svelte/store';
-import { 
-	DEFAULT_LIGHT_EFFECTS, 
-	DEFAULT_WATER_EFFECTS, 
-	DEFAULT_PARTICLE_EFFECTS, 
-	DEFAULT_GRADIENT_SETTINGS 
+import {
+	DEFAULT_LIGHT_EFFECTS,
+	DEFAULT_WATER_EFFECTS,
+	DEFAULT_PARTICLE_EFFECTS,
+	DEFAULT_GRADIENT_SETTINGS
 } from '$lib/config/defaultSettings';
 
 const MAX_HISTORY_SIZE = 20;
@@ -18,7 +18,7 @@ export interface BackgroundSettings {
 	gradientColor2HistoryIndex: number;
 	isAutoCyclingColor1: boolean;
 	isAutoCyclingColor2: boolean;
-	
+
 	// Light Effects
 	sunGlowEnabled: boolean;
 	sunGlowIntensity: number;
@@ -27,7 +27,7 @@ export interface BackgroundSettings {
 	sunGlowPulseSpeed: number;
 	sunGlintIntensity: number;
 	sunGlintQuantity: number;
-	
+
 	// Water Effects
 	ripplesEnabled: boolean;
 	rippleSize: number;
@@ -37,7 +37,7 @@ export interface BackgroundSettings {
 	shimmerIntensity: number;
 	shimmerSpeed: number;
 	shimmerCount: number;
-	
+
 	// Particle Effects
 	waterGrainsEnabled: boolean;
 	grainDensity: number;
@@ -64,7 +64,7 @@ const defaultBackgroundSettings: BackgroundSettings = {
 	gradientColor2HistoryIndex: 0,
 	isAutoCyclingColor1: false,
 	isAutoCyclingColor2: false,
-	
+
 	// Light Effects defaults
 	sunGlowEnabled: DEFAULT_LIGHT_EFFECTS.sunGlow.enabled,
 	sunGlowIntensity: DEFAULT_LIGHT_EFFECTS.sunGlow.intensity,
@@ -73,7 +73,7 @@ const defaultBackgroundSettings: BackgroundSettings = {
 	sunGlowPulseSpeed: DEFAULT_LIGHT_EFFECTS.sunGlow.pulseSpeed,
 	sunGlintIntensity: DEFAULT_LIGHT_EFFECTS.sunGlow.glintIntensity,
 	sunGlintQuantity: DEFAULT_LIGHT_EFFECTS.sunGlow.glintQuantity,
-	
+
 	// Water Effects defaults
 	ripplesEnabled: DEFAULT_WATER_EFFECTS.ripples.enabled,
 	rippleSize: DEFAULT_WATER_EFFECTS.ripples.mouseMove.maxRadius,
@@ -83,18 +83,29 @@ const defaultBackgroundSettings: BackgroundSettings = {
 	shimmerIntensity: DEFAULT_WATER_EFFECTS.shimmer.maxOpacity,
 	shimmerSpeed: DEFAULT_WATER_EFFECTS.shimmer.maxSpeedFactor,
 	shimmerCount: DEFAULT_WATER_EFFECTS.shimmer.waveSpots,
-	
+
 	// Particle Effects defaults
 	waterGrainsEnabled: DEFAULT_PARTICLE_EFFECTS.waterGrains.enabled,
 	grainDensity: DEFAULT_PARTICLE_EFFECTS.waterGrains.count,
-	grainSpeed: (DEFAULT_PARTICLE_EFFECTS.waterGrains.minSpeed + DEFAULT_PARTICLE_EFFECTS.waterGrains.maxSpeed) / 2,
-	grainSize: (DEFAULT_PARTICLE_EFFECTS.waterGrains.minSize + DEFAULT_PARTICLE_EFFECTS.waterGrains.maxSize) / 2,
-	grainOpacity: (DEFAULT_PARTICLE_EFFECTS.waterGrains.minOpacity + DEFAULT_PARTICLE_EFFECTS.waterGrains.maxOpacity) / 2,
+	grainSpeed:
+		(DEFAULT_PARTICLE_EFFECTS.waterGrains.minSpeed +
+			DEFAULT_PARTICLE_EFFECTS.waterGrains.maxSpeed) /
+		2,
+	grainSize:
+		(DEFAULT_PARTICLE_EFFECTS.waterGrains.minSize + DEFAULT_PARTICLE_EFFECTS.waterGrains.maxSize) /
+		2,
+	grainOpacity:
+		(DEFAULT_PARTICLE_EFFECTS.waterGrains.minOpacity +
+			DEFAULT_PARTICLE_EFFECTS.waterGrains.maxOpacity) /
+		2,
 	grainLightness: DEFAULT_PARTICLE_EFFECTS.waterGrains.lightness,
 	foamEnabled: DEFAULT_PARTICLE_EFFECTS.foamStreaks.enabled,
 	foamFrequency: DEFAULT_PARTICLE_EFFECTS.foamStreaks.chancePerFrame,
 	foamLifetime: 750, // Default to 12.5 seconds (750/60)
-	foamComplexity: (DEFAULT_PARTICLE_EFFECTS.foamStreaks.streak.mainPathSegmentsMin + DEFAULT_PARTICLE_EFFECTS.foamStreaks.streak.mainPathSegmentsMax) / 2,
+	foamComplexity:
+		(DEFAULT_PARTICLE_EFFECTS.foamStreaks.streak.mainPathSegmentsMin +
+			DEFAULT_PARTICLE_EFFECTS.foamStreaks.streak.mainPathSegmentsMax) /
+		2,
 	foamBranchiness: DEFAULT_PARTICLE_EFFECTS.foamStreaks.streak.branchChance,
 	foamAnimationSpeed: 1.0,
 	foamOpacity: 0.7
@@ -171,75 +182,67 @@ export function generateControlledRandomStep(currentHslString: string): string {
 
 // const LOCAL_STORAGE_KEY = 'backgroundSettings'; // Keep this if we decide to use it consistently, or remove
 
+export const backgroundNotice = writable('');
 function loadBackgroundSettings(): BackgroundSettings {
-	let settingsToReturn = {
-		...defaultBackgroundSettings,
-		gradientColor1History: [...defaultBackgroundSettings.gradientColor1History],
-		gradientColor2History: [...defaultBackgroundSettings.gradientColor2History]
-	};
-	if (typeof localStorage !== 'undefined') {
-		const storedSettings = localStorage.getItem('backgroundSettings');
-		if (storedSettings) {
-			try {
-				const parsed = JSON.parse(storedSettings) as Partial<BackgroundSettings>;
-
-				settingsToReturn = {
-					...settingsToReturn,
-					...parsed,
-					isAutoCyclingColor1:
-						parsed.isAutoCyclingColor1 ?? defaultBackgroundSettings.isAutoCyclingColor1,
-					isAutoCyclingColor2:
-						parsed.isAutoCyclingColor2 ?? defaultBackgroundSettings.isAutoCyclingColor2
-				};
-
-				if (!parsed.gradientColor1History || parsed.gradientColor1History.length === 0) {
-					settingsToReturn.gradientColor1History = [settingsToReturn.gradientColor1];
-					settingsToReturn.gradientColor1HistoryIndex = 0;
-				} else {
-					settingsToReturn.gradientColor1HistoryIndex = Math.max(
-						0,
-						Math.min(
-							parsed.gradientColor1HistoryIndex ?? 0,
-							parsed.gradientColor1History.length - 1
-						)
-					);
-					settingsToReturn.gradientColor1 =
-						parsed.gradientColor1History[settingsToReturn.gradientColor1HistoryIndex];
-				}
-
-				if (!parsed.gradientColor2History || parsed.gradientColor2History.length === 0) {
-					settingsToReturn.gradientColor2History = [settingsToReturn.gradientColor2];
-					settingsToReturn.gradientColor2HistoryIndex = 0;
-				} else {
-					settingsToReturn.gradientColor2HistoryIndex = Math.max(
-						0,
-						Math.min(
-							parsed.gradientColor2HistoryIndex ?? 0,
-							parsed.gradientColor2History.length - 1
-						)
-					);
-					settingsToReturn.gradientColor2 =
-						parsed.gradientColor2History[settingsToReturn.gradientColor2HistoryIndex];
-				}
-			} catch (e) {
-				console.error('Failed to parse background settings from localStorage', e);
-				return {
-					...defaultBackgroundSettings,
-					gradientColor1History: [...defaultBackgroundSettings.gradientColor1History],
-					gradientColor2History: [...defaultBackgroundSettings.gradientColor2History]
-				};
-			}
+	const defaults = { ...defaultBackgroundSettings };
+	if (typeof window === 'undefined') return defaults;
+	try {
+		const raw = window.localStorage.getItem('backgroundSettings');
+		if (raw === null) return defaults;
+		const parsed: unknown = JSON.parse(raw);
+		if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed))
+			throw new Error('Invalid background');
+		const source = parsed as Record<string, unknown>;
+		const validColor = (value: unknown): value is string =>
+			typeof value === 'string' &&
+			value.length <= 100 &&
+			/^hsl\(\s*\d{1,3}(?:\.\d+)?\s*,\s*\d{1,3}(?:\.\d+)?%\s*,\s*\d{1,3}(?:\.\d+)?%\s*\)$/.test(
+				value
+			);
+		// Validate every known field by its default shape before using saved values.
+		const clean: Record<string, unknown> = { ...defaults };
+		for (const [field, fallback] of Object.entries(defaults)) {
+			const value = source[field];
+			if (value === undefined) continue;
+			const valid =
+				typeof fallback === 'boolean'
+					? typeof value === 'boolean'
+					: typeof fallback === 'number'
+						? typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 10000
+						: Array.isArray(fallback)
+							? Array.isArray(value) &&
+								value.length > 0 &&
+								value.length <= MAX_HISTORY_SIZE &&
+								value.every(validColor)
+							: validColor(value);
+			if (!valid) throw new Error('Invalid background field');
+			clean[field] = value;
 		}
+		const result = clean as unknown as BackgroundSettings;
+		for (const channel of [1, 2] as const) {
+			const history = result[`gradientColor${channel}History`];
+			const index = result[`gradientColor${channel}HistoryIndex`];
+			if (!Number.isInteger(index) || index >= history.length)
+				throw new Error('Invalid history index');
+		}
+		return result;
+	} catch {
+		backgroundNotice.set(
+			'Saved background settings could not be read. Defaults are available in the dock.'
+		);
+		return defaults;
 	}
-	return settingsToReturn;
 }
-
-const initialSettings = loadBackgroundSettings();
-export const backgroundSettings = writable<BackgroundSettings>(initialSettings);
-
-if (typeof localStorage !== 'undefined') {
+export const backgroundSettings = writable<BackgroundSettings>(loadBackgroundSettings());
+if (typeof window !== 'undefined') {
 	backgroundSettings.subscribe((value) => {
-		localStorage.setItem('backgroundSettings', JSON.stringify(value));
+		try {
+			window.localStorage.setItem('backgroundSettings', JSON.stringify(value));
+		} catch {
+			backgroundNotice.set(
+				"Background preferences won't persist. Controls still work for this visit."
+			);
+		}
 	});
 }
 
@@ -264,7 +267,7 @@ export function setGradientColor1(newColor: string): void;
 export function setGradientColor1(h: number, s: number, l: number): void;
 export function setGradientColor1(hOrColor: string | number, s?: number, l?: number) {
 	let newColor: string;
-	
+
 	if (typeof hOrColor === 'string') {
 		newColor = hOrColor;
 	} else {
@@ -291,7 +294,7 @@ export function setGradientColor2(newColor: string): void;
 export function setGradientColor2(h: number, s: number, l: number): void;
 export function setGradientColor2(hOrColor: string | number, s?: number, l?: number) {
 	let newColor: string;
-	
+
 	if (typeof hOrColor === 'string') {
 		newColor = hOrColor;
 	} else {

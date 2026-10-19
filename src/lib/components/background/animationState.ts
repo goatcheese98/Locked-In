@@ -486,10 +486,8 @@ export function releaseFoamStreak(streakToRelease: FoamStreak): void {
 export function releaseWaterGrain(grainToRelease: WaterGrain): void {
 	const index = activeWaterGrains.findIndex((wg) => wg.id === grainToRelease.id);
 	if (index !== -1) {
-		const releasedGrain = activeWaterGrains.splice(index, 1)[0];
-		if (releasedGrain) {
-			inactiveWaterGrains.push(releasedGrain);
-		}
+		// Water grains are created directly rather than acquired from a pool.
+		activeWaterGrains.splice(index, 1);
 	} else {
 		console.warn(
 			`Attempted to release waterGrain with ID ${grainToRelease.id} not found in active list.`

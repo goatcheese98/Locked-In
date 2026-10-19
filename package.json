@@ -11,16 +11,21 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"format": "prettier --write .",
-		"lint": "prettier --check . && eslint ."
+		"lint": "prettier --check . && eslint .",
+		"test:e2e": "playwright test",
+		"test": "node --experimental-strip-types tests/timer.test.ts",
+		"lint:focus": "prettier --check src/lib/stores/timerStore.ts src/lib/stores/backgroundSettingsStore.ts src/lib/components/TimerSettings.svelte src/lib/components/TimerControls.svelte src/lib/components/TimerDisplay.svelte src/routes/+page.svelte src/routes/+layout.svelte src/lib/components/FloatingDock.svelte src/lib/components/background/animationState.ts src/lib/components/background/effects/waterGrains.ts playwright.config.ts tests/focus.spec.ts tests/timer.test.ts src/app.css && eslint src/lib/stores/timerStore.ts src/lib/stores/backgroundSettingsStore.ts src/lib/components/TimerSettings.svelte src/lib/components/TimerControls.svelte src/lib/components/TimerDisplay.svelte src/routes/+page.svelte src/routes/+layout.svelte src/lib/components/FloatingDock.svelte src/lib/components/background/animationState.ts src/lib/components/background/effects/waterGrains.ts playwright.config.ts tests/focus.spec.ts tests/timer.test.ts"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.2.5",
 		"@eslint/js": "^9.18.0",
+		"@playwright/test": "^1.64.1",
 		"@sveltejs/adapter-auto": "^6.0.0",
 		"@sveltejs/adapter-static": "^3.0.8",
 		"@sveltejs/kit": "^2.16.0",
 		"@sveltejs/vite-plugin-svelte": "^6.1.0",
 		"@tailwindcss/vite": "^4.0.0",
+		"@types/node": "^24.19.2",
 		"eslint": "^9.18.0",
 		"eslint-config-prettier": "^10.0.1",
 		"eslint-plugin-svelte": "^3.0.0",
@@ -36,6 +41,8 @@
 		"vite": "^7.0.6"
 	},
 	"dependencies": {
+		"@fontsource-variable/geist": "^5.3.0",
+		"@fontsource-variable/geist-mono": "^5.3.0",
 		"bits-ui": "^2.8.13",
 		"clsx": "^2.1.1",
 		"lucide-svelte": "^0.510.0",

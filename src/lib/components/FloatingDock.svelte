@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { Palette, Waves, Sun, Sparkles, Timer, Settings } from 'lucide-svelte';
 	import ProfessionalHSLPicker from './ProfessionalHSLPicker.svelte';
 	import TimerSettings from './TimerSettings.svelte';
 	import WaterEffectsPanel from './WaterEffectsPanel.svelte';
 	import ParticleEffectsPanel from './ParticleEffectsPanel.svelte';
 	import LightEffectsPanel from './LightEffectsPanel.svelte';
 
+	export let onTimerSettings: (() => void) | undefined = undefined;
 	let isVisible = false;
 	let hideTimeout: number;
 	let mouseY = 0;
@@ -83,7 +85,7 @@
 
 	function scheduleHide() {
 		if (hideTimeout) clearTimeout(hideTimeout);
-		hideTimeout = setTimeout(hideDock, AUTO_HIDE_DELAY);
+		hideTimeout = window.setTimeout(hideDock, AUTO_HIDE_DELAY);
 	}
 
 	function handleDockMouseEnter() {
@@ -105,6 +107,11 @@
 	}
 
 	function togglePanel(panel: string) {
+		if (panel === 'timer' && onTimerSettings) {
+			closeAllPanels();
+			onTimerSettings();
+			return;
+		}
 		const wasVisible = {
 			colors: showColorGrid,
 			timer: showTimerSettings,
@@ -162,65 +169,62 @@
 		{
 			id: 'colors',
 			title: 'Color Palette',
-			icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c1.34 0 2.61-.26 3.79-.75 1.15-.47 2.22-1.13 3.21-1.95.99-.82 1.87-1.77 2.63-2.81.54-.74.99-1.53 1.37-2.39.37-.85.64-1.76.81-2.7.17-.94.25-1.92.25-2.91 0-5.52-4.48-10-10-10zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/><path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c1.66 0 3.16-.67 4.24-1.76.33-.33.62-.69.88-1.07C17.51 14.31 18 13.19 18 12c0-3.31-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/><circle cx="12" cy="12" r="2"/></svg>`
+			icon: Palette
 		},
 		{
 			id: 'water',
 			title: 'Water Effects',
-			icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12C2 6.48 6.48 2 12 2s10 4.48 10 10-4.48 10-10 10S2 17.52 2 12zm5.29-4.71a7.983 7.983 0 0 1 9.42 0 7.983 7.983 0 0 1 0 9.42 7.983 7.983 0 0 1-9.42 0 7.983 7.983 0 0 1 0-9.42zM9 12c0-1.66 1.34-3 3-3s3 1.34 3 3-1.34 3-3 3-3-1.34-3-3z"/></svg>`
+			icon: Waves
 		},
 		{
 			id: 'light',
 			title: 'Light Effects',
-			icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4m-2.83-7.07l-2.83 2.83M16.24 16.24l-2.83 2.83M12 6a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg>`
+			icon: Sun
 		},
 		{
 			id: 'particles',
 			title: 'Particle Effects',
-			icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="5" r="1"/><circle cx="5" cy="19" r="1"/><circle cx="5" cy="5" r="1"/><circle cx="19" cy="19" r="1"/></svg>`
+			icon: Sparkles
 		},
 		{
 			id: 'timer',
 			title: 'Timer Settings',
-			icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>`
+			icon: Timer
 		},
 		{
 			id: 'settings',
 			title: 'Master Settings',
-			icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19.14 12.94a8.003 8.003 0 0 0-1.4-3.88l1.7-1.7a1 1 0 0 0 0-1.42l-1.83-1.83a1 1 0 0 0-1.42 0l-1.7 1.7A8.003 8.003 0 0 0 9.06 4.86L7.34 3.14a1 1 0 0 0-1.42 0L4.09 4.97a1 1 0 0 0 0 1.42l1.7 1.7A8.003 8.003 0 0 0 4.86 12H3.14a1 1 0 0 0 0 2h1.72a8.003 8.003 0 0 0 1.4 3.88l-1.7 1.7a1 1 0 0 0 0 1.42l1.83 1.83a1 1 0 0 0 1.42 0l1.7-1.7c1.18.83 2.54 1.32 3.98 1.32s2.8-.49 3.98-1.32l1.7 1.7a1 1 0 0 0 1.42 0l1.83-1.83a1 1 0 0 0 0-1.42l-1.7-1.7a8.003 8.003 0 0 0 1.4-3.88h1.72a1 1 0 0 0 0-2h-1.72zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/></svg>`
+			icon: Settings
 		}
 	];
 
 	$: activePanel = showColorGrid
 		? 'colors'
 		: showTimerSettings
-		? 'timer'
-		: showWaterEffects
-		? 'water'
-		: showLightEffects
-		? 'light'
-		: showParticleEffects
-		? 'particles'
-		: showMasterSettings
-		? 'settings'
-		: null;
+			? 'timer'
+			: showWaterEffects
+				? 'water'
+				: showLightEffects
+					? 'light'
+					: showParticleEffects
+						? 'particles'
+						: showMasterSettings
+							? 'settings'
+							: null;
 </script>
 
 <div
-	class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 ease-in-out"
+	class="effects-dock fixed bottom-4 left-1/2 z-50 -translate-x-1/2 transition-all duration-300 ease-in-out"
 	class:translate-y-20={!isVisible}
 	class:opacity-0={!isVisible}
 	class:pointer-events-none={!isVisible}
+	on:focusin={showDock}
 	on:mouseenter={handleDockMouseEnter}
 	on:mouseleave={handleDockMouseLeave}
 	role="toolbar"
 	aria-label="Background Effects Dock"
 >
-	<div
-		class="flex items-end justify-center gap-2"
-		on:mouseleave={handleMouseLeave}
-		role="group"
-	>
+	<div class="flex items-end justify-center gap-2" on:mouseleave={handleMouseLeave} role="group">
 		{#each dockItems as item, index (item.id)}
 			<button
 				class="dock-item"
@@ -231,7 +235,9 @@
 				aria-label={item.title}
 				style={`transform: scale(${calculateScale(index)});`}
 			>
-				<div class="dock-icon">{@html item.icon}</div>
+				<div class="dock-icon">
+					<svelte:component this={item.icon} size={24} aria-hidden="true" />
+				</div>
 			</button>
 		{/each}
 	</div>
@@ -264,6 +270,31 @@
 </div>
 
 <style>
+	.effects-dock:focus-within {
+		opacity: 1 !important;
+		transform: translateX(-50%) !important;
+		pointer-events: auto !important;
+	}
+	@media (max-width: 767px) {
+		.effects-dock {
+			max-width: calc(100vw - 32px);
+		}
+		.effects-dock > div:first-child {
+			gap: 4px;
+		}
+		.effects-dock .dock-item {
+			width: 44px;
+			height: 44px;
+			flex-shrink: 0;
+			transform: none !important;
+		}
+		.effects-dock .panel-container {
+			max-width: calc(100vw - 32px);
+			overflow: auto;
+			max-height: 70svh;
+		}
+	}
+
 	.dock-item {
 		width: 48px;
 		height: 48px;
