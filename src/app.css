@@ -1,8 +1,294 @@
 @import 'tailwindcss';
 
-/* Ensure no default background colors */
-html, body {
-	background: transparent;
+:root {
+	--bg: #fff;
+	--panel: #fff;
+	--panel2: #fafafa;
+	--line: #e4e4e7;
+	--line2: #efeff1;
+	--fg: #18181b;
+	--mut: #66666f;
+	--mut2: #a1a1aa;
+	--acc: #18181b;
+	--on-acc: #fff;
+	--danger: #d33b3b;
+	--font-sans: 'Geist Variable', system-ui, sans-serif;
+	--font-ui: var(--font-sans);
+	--font-mono: 'Geist Mono Variable', ui-monospace, monospace;
+	--r-xs: 6px;
+	--r-sm: 8px;
+	--r-md: 10px;
+	--r-lg: 12px;
+	--r-xl: 16px;
+	font-family: var(--font-sans);
+	color: var(--fg);
+	background: var(--bg);
+	color-scheme: light;
+}
+html[data-theme='dark'] {
+	--bg: #0a0a0b;
+	--panel: #121214;
+	--panel2: #0e0e10;
+	--line: #242428;
+	--line2: #1a1a1d;
+	--fg: #ececee;
+	--mut: #92929b;
+	--mut2: #8b8b94;
+	--acc: #d6a828;
+	--on-acc: #141210;
+	--danger: #d6635e;
+	color-scheme: dark;
+}
+* {
+	box-sizing: border-box;
+}
+body {
 	margin: 0;
-	padding: 0;
+}
+button,
+input,
+select {
+	font: inherit;
+	color: var(--fg);
+}
+button,
+select,
+input[type='number'] {
+	min-height: 44px;
+	border: 1px solid var(--line);
+	border-radius: var(--r-sm);
+	background: var(--panel);
+	padding: 10px 12px;
+}
+button {
+	cursor: pointer;
+}
+button:hover {
+	background: var(--panel2);
+}
+button:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+:focus-visible {
+	outline: 2px solid var(--acc);
+	outline-offset: 2px;
+}
+p {
+	margin: 0;
+	color: var(--mut);
+}
+h1 {
+	font-size: 16px;
+	font-weight: 700;
+	letter-spacing: -0.02em;
+	margin: 0;
+}
+h2 {
+	font-size: 20px;
+	font-weight: 650;
+	margin: 0;
+}
+.primary {
+	background: var(--acc);
+	border-color: var(--acc);
+	color: var(--on-acc);
+	font-weight: 600;
+}
+.primary:hover {
+	background: var(--acc);
+	filter: brightness(0.94);
+}
+.quiet {
+	border-color: transparent;
+	background: transparent;
+}
+.focus-screen {
+	position: relative;
+	z-index: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 32px;
+	min-height: 100svh;
+	padding: 32px;
+	font-size: 14px;
+}
+.focus-screen.with-effects {
+	background: color-mix(in srgb, var(--bg) 90%, transparent);
+}
+header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 16px;
+	min-height: 48px;
+	padding-bottom: 16px;
+	border-bottom: 1px solid var(--line);
+}
+.header-actions {
+	display: flex;
+	gap: 8px;
+}
+.workspace {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 24px;
+	padding: 24px 0;
+}
+.modes {
+	display: flex;
+	gap: 4px;
+	padding: 4px;
+	border: 1px solid var(--line);
+	border-radius: var(--r-md);
+	background: var(--panel2);
+}
+.modes button {
+	padding: 12px 24px;
+	border: 1px solid transparent;
+	background: transparent;
+	color: var(--mut);
+	border-radius: var(--r-xs);
+}
+.modes button[aria-checked='true'] {
+	border-color: var(--line);
+	background: var(--panel);
+	color: var(--fg);
+	font-weight: 600;
+}
+.timer-display {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	padding: 24px;
+	text-align: center;
+}
+.digits {
+	color: var(--fg);
+	font-family: var(--font-mono);
+	font-size: 96px;
+	line-height: 1.25;
+	letter-spacing: -0.06em;
+	font-variant-numeric: tabular-nums;
+}
+.timer-actions {
+	display: flex;
+	gap: 12px;
+}
+.timer-actions .primary {
+	width: 160px;
+}
+.timer-actions button:not(.primary) {
+	width: 80px;
+}
+.workspace > .quiet {
+	margin-top: -16px;
+	font-size: 13px;
+	color: var(--mut);
+}
+footer {
+	display: flex;
+	justify-content: space-between;
+	gap: 16px;
+	padding-top: 16px;
+	border-top: 1px solid var(--line);
+	color: var(--mut);
+	font-size: 13px;
+}
+dialog {
+	margin: auto;
+	width: min(440px, calc(100% - 32px));
+	max-height: calc(100svh - 32px);
+	overflow: auto;
+	border: 1px solid var(--line);
+	border-radius: var(--r-lg);
+	background: var(--panel);
+	color: var(--fg);
+	padding: 24px;
+}
+dialog::backdrop {
+	background: #0006;
+}
+.settings-form {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+.settings-form p {
+	font-size: 14px;
+}
+.settings-form input[type='number'],
+.settings-form select {
+	width: 100%;
+	font-family: var(--font-mono);
+}
+.check {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	min-height: 44px;
+}
+.check input {
+	width: 20px;
+	height: 20px;
+	accent-color: var(--acc);
+}
+.dialog-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+	margin-top: 12px;
+}
+.error {
+	color: var(--danger);
+}
+.notice {
+	max-width: 440px;
+	text-align: center;
+}
+@media (max-width: 767px) {
+	.focus-screen {
+		padding: 16px;
+		font-size: 16px;
+		gap: 24px;
+	}
+	header {
+		flex-wrap: wrap;
+	}
+	.header-actions {
+		flex-wrap: wrap;
+	}
+	.modes {
+		width: 100%;
+		max-width: 440px;
+	}
+	.modes button {
+		flex: 1;
+		padding-inline: 12px;
+		font-size: 14px;
+	}
+	.timer-display {
+		padding: 24px 0;
+	}
+	.digits {
+		font-size: clamp(64px, 18vw, 96px);
+	}
+	footer {
+		flex-direction: column;
+		font-size: 14px;
+		padding-bottom: 64px;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation: none !important;
+		transition: none !important;
+		scroll-behavior: auto !important;
+	}
 }
