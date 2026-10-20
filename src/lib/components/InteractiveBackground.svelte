@@ -1,97 +1,29 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
-	import type {
-		Ripple,
-		ShimmerSpot,
-		SunGlow,
-		SunGlint,
-		RareSighting,
-		WaterGrain,
-		FoamParticle,
-		FoamStreak
-	} from './background/types';
+	import { onMount } from 'svelte';
+
 	import {
-		RIPPLE_CONFIG,
 		AMBIENT_RIPPLE_INTERVAL,
 		MAX_SHIMMER_SPOTS,
 		MOUSE_MOVE_THROTTLE,
 		LONG_PRESS_DURATION,
 		LONG_PRESS_MOVE_THRESHOLD,
-		SUN_GLOW_PULSE_SPEED_MIN,
-		SUN_GLOW_PULSE_SPEED_MAX,
-		MAX_SUN_GLINTS,
-		TARGET_GLINTS_TO_SPAWN_AT_BASE_OPACITY,
-		TARGET_GLINTS_TO_SPAWN_AT_PEAK_OPACITY,
-		SUN_GLINT_COLOR,
 		MAX_RARE_SIGHTINGS,
 		RARE_SIGHTING_CHECK_INTERVAL,
 		NUM_WAVE_SHIMMER_SPOTS,
-		WAVE_SHIMMER_MIN_OPACITY,
-		WAVE_SHIMMER_MAX_OPACITY,
-		WAVE_SHIMMER_MIN_SPEED_FACTOR,
-		WAVE_SHIMMER_MAX_SPEED_FACTOR,
-		WAVE_SHIMMER_COLOR_LIGHTNESS_MIN,
-		WAVE_SHIMMER_COLOR_LIGHTNESS_MAX,
-		SHIMMER_SPAWN_AREA_WIDTH_RATIO,
-		SHIMMER_SPAWN_AREA_HEIGHT_RATIO,
-		SHIMMER_RESIZE_MIN_SPEED_MULTIPLIER,
-		SHIMMER_RESIZE_MAX_SPEED_MULTIPLIER,
-		NUM_WATER_GRAINS,
-		GRAIN_MIN_SPEED,
-		GRAIN_MAX_SPEED,
-		GRAIN_MIN_SIZE,
-		GRAIN_MAX_SIZE,
-		GRAIN_MIN_OPACITY,
-		GRAIN_MAX_OPACITY,
 		GRADIENT_DIRECTION_CHANGE_INTERVAL,
 		GRADIENT_TRANSITION_DURATION,
 		GRADIENT_DIRECTIONS,
 		MAX_FOAM_STREAKS,
 		FOAM_STREAK_CHANCE_PER_FRAME,
-		FOAM_STREAK_COLOR_PRIMARY,
-		FOAM_STREAK_COLOR_SECONDARY,
-		FOAM_PARTICLE_MIN_SIZE,
-		FOAM_PARTICLE_MAX_SIZE,
-		FOAM_STREAK_NUM_PARTICLES_MIN,
-		FOAM_STREAK_NUM_PARTICLES_MAX,
-		FOAM_STREAK_MAX_WIDTH,
-		FOAM_STREAK_SEGMENT_LENGTH_MIN,
-		FOAM_STREAK_SEGMENT_LENGTH_MAX,
-		FOAM_STREAK_LIFESPAN_MIN,
-		FOAM_STREAK_LIFESPAN_MAX,
-		FOAM_STREAK_FADE_DURATION_RATIO,
-		FOAM_STREAK_DRIFT_X_MIN,
-		FOAM_STREAK_DRIFT_X_MAX,
-		FOAM_STREAK_DRIFT_Y_MIN,
-		FOAM_STREAK_DRIFT_Y_MAX,
-		FOAM_STREAK_WOBBLE_FACTOR,
-		FOAM_PARTICLE_APPEAR_DELAY_PER_PARTICLE,
-		FOAM_STREAK_JAGGEDNESS,
-		FOAM_STREAK_MAIN_PATH_SEGMENTS_MIN,
-		FOAM_STREAK_MAIN_PATH_SEGMENTS_MAX,
-		FOAM_BRANCH_CHANCE,
-		FOAM_SUB_BRANCH_MAX_SEGMENTS,
-		FOAM_SUB_BRANCH_ANGLE_OFFSET,
-		FOAM_PARTICLES_PER_SEGMENT_POINT,
-		FOAM_PARTICLE_LIFESPAN_MIN,
-		FOAM_PARTICLE_LIFESPAN_MAX,
-		FOAM_PARTICLE_FADE_RATIO,
 		RARE_SIGHTING_CONFIGS
 	} from './background/constants';
-	import { easeInOutQuad, getWarpOffset } from './background/utils';
+	import { easeInOutQuad } from './background/utils';
 	import {
-		addShimmerSpot,
-		addSunGlow,
-		addSunGlint,
-		addWaterGrain,
-		addFoamStreak,
 		getShimmerSpots,
 		getSunGlows,
-		getSunGlints,
 		getRareSightings,
 		getWaterGrains,
-		getFoamStreaks,
-		releaseWaterGrain
+		getFoamStreaks
 	} from './background/animationState';
 	import { createRipple, updateAndDrawRipples } from './background/effects/ripples';
 	import {
@@ -120,9 +52,9 @@
 	} from './background/effects/foamStreaks';
 
 	import { backgroundSettings, type BackgroundSettings } from '$lib/stores/backgroundSettingsStore';
-	
+
 	export let settings: BackgroundSettings;
-	
+
 	// Extract gradient colors from settings with fallbacks
 	$: gradientColor1 = settings?.gradientColor1 || 'hsl(210, 70%, 50%)';
 	$: gradientColor2 = settings?.gradientColor2 || 'hsl(200, 68%, 50%)';
@@ -166,74 +98,6 @@
 		let timeSinceLastSightingAttempt = 0;
 
 		// --- HELPER & DRAWING FUNCTIONS (NOW INSIDE ONMOUNT, USING LOCAL CTX & CANVAS) ---
-		function createShimmerSpotInternal(isWaveType: boolean) {
-			if (!ctx || !canvas) return;
-
-			let spotSize: number;
-			let initialVx: number;
-			let initialVy: number;
-			let opacity: number;
-			let growthSpeed: number;
-			let opacitySpeedValue: number;
-			let color: string;
-			let speedFactor = 1;
-
-			const spawnMinX = (canvas.width * (1 - SHIMMER_SPAWN_AREA_WIDTH_RATIO)) / 2;
-			const spawnWidth = canvas.width * SHIMMER_SPAWN_AREA_WIDTH_RATIO;
-			const spawnMinY = (canvas.height * (1 - SHIMMER_SPAWN_AREA_HEIGHT_RATIO)) / 2;
-			const spawnHeight = canvas.height * SHIMMER_SPAWN_AREA_HEIGHT_RATIO;
-
-			const xPos = spawnMinX + Math.random() * spawnWidth;
-			const yPos = spawnMinY + Math.random() * spawnHeight;
-
-			if (isWaveType) {
-				spotSize = (Math.min(canvas.width, canvas.height) / 2) * (0.8 + Math.random() * 0.4);
-				speedFactor =
-					WAVE_SHIMMER_MIN_SPEED_FACTOR +
-					Math.random() * (WAVE_SHIMMER_MAX_SPEED_FACTOR - WAVE_SHIMMER_MIN_SPEED_FACTOR);
-				initialVx = (Math.random() - 0.5) * 0.2 * speedFactor;
-				initialVy = (Math.random() - 0.5) * 0.2 * speedFactor;
-				opacity =
-					WAVE_SHIMMER_MIN_OPACITY +
-					Math.random() * (WAVE_SHIMMER_MAX_OPACITY - WAVE_SHIMMER_MIN_OPACITY);
-				growthSpeed =
-					(Math.random() * 0.015 + 0.005) * (Math.random() < 0.5 ? 1 : -1) * speedFactor;
-				opacitySpeedValue =
-					(Math.random() * 0.00015 + 0.00005) * (Math.random() < 0.5 ? 1 : -1) * speedFactor;
-				color = `hsl(210, ${68 + Math.random() * 10}%, ${WAVE_SHIMMER_COLOR_LIGHTNESS_MIN + Math.random() * (WAVE_SHIMMER_COLOR_LIGHTNESS_MAX - WAVE_SHIMMER_COLOR_LIGHTNESS_MIN)}%)`;
-			} else {
-				spotSize = Math.random() * 80 + 40;
-				initialVx = (Math.random() - 0.5) * 0.12;
-				initialVy = (Math.random() - 0.5) * 0.12;
-				opacity = Math.random() * 0.03 + 0.01;
-				growthSpeed = (Math.random() * 0.02 + 0.01) * (Math.random() < 0.5 ? 1 : -1);
-				opacitySpeedValue = (Math.random() * 0.0002 + 0.0001) * (Math.random() < 0.5 ? 1 : -1);
-				color = `hsl(${200 + Math.random() * 20}, ${65 + Math.random() * 20}%, ${35 + Math.random() * 30}%)`;
-			}
-
-			addShimmerSpot({
-				x: xPos,
-				y: yPos,
-				radius: Math.random() * spotSize * 0.3 + spotSize * 0.2,
-				currentMaxRadius: spotSize,
-				opacity: opacity,
-				growthSpeed: growthSpeed,
-				opacitySpeed: opacitySpeedValue,
-				color: color,
-				vx: initialVx,
-				vy: initialVy,
-				isWave: isWaveType,
-				relativeXInSpawn: (xPos - spawnMinX) / spawnWidth,
-				relativeYInSpawn: (yPos - spawnMinY) / spawnHeight,
-				baseVx: initialVx,
-				baseVy: initialVy
-			});
-		}
-
-		// --- Background Warping Parameters ---
-		const warpStrength = 15; // Increased for more pronounced warping
-		const warpScale = 0.04; // How coarse the warping is (keeping this for now)
-
 		function updateDynamicGradient() {
 			const now = Date.now();
 			if (lastGradientDirectionChangeTime === 0) {
@@ -333,7 +197,12 @@
 		const tryCreateAmbientRipple = () => {
 			if (!canvas) return;
 			// For now, always create ripples to test
-			createRipple(Math.random() * canvas.width, Math.random() * canvas.height, 'ambient', settings);
+			createRipple(
+				Math.random() * canvas.width,
+				Math.random() * canvas.height,
+				'ambient',
+				settings
+			);
 		};
 
 		// --- Setup & Animation Loop ---
@@ -403,13 +272,15 @@
 			const gradY2 = interpolatedGradientCoords.y2 * canvas.height;
 			const gradient = ctx.createLinearGradient(gradX1, gradY1, gradX2, gradY2);
 			// Validate color values before using them
-			const color1 = typeof gradientColor1 === 'string' && gradientColor1.includes('hsl') 
-				? gradientColor1 
-				: 'hsl(210, 70%, 50%)';
-			const color2 = typeof gradientColor2 === 'string' && gradientColor2.includes('hsl') 
-				? gradientColor2 
-				: 'hsl(200, 68%, 50%)';
-			
+			const color1 =
+				typeof gradientColor1 === 'string' && gradientColor1.includes('hsl')
+					? gradientColor1
+					: 'hsl(210, 70%, 50%)';
+			const color2 =
+				typeof gradientColor2 === 'string' && gradientColor2.includes('hsl')
+					? gradientColor2
+					: 'hsl(200, 68%, 50%)';
+
 			gradient.addColorStop(0, color1);
 			gradient.addColorStop(1, color2);
 			ctx.fillStyle = gradient;
@@ -455,7 +326,6 @@
 			// Use imported function
 			updateAndDrawRareSightingsEffect(ctx, canvas.width, canvas.height);
 
-
 			// Foam streak creation (only if enabled)
 			if (settings?.foamEnabled) {
 				if (
@@ -487,14 +357,3 @@
 
 <canvas bind:this={canvasRef} class="pointer-events-none fixed top-0 left-0 -z-10 h-full w-full"
 ></canvas>
-
-<style>
-	body {
-		user-select: none; /* Attempt to prevent text selection globally for better long-press experience */
-		-webkit-user-select: none;
-		-ms-user-select: none;
-	}
-	canvas {
-		/* background-color: rgba(20,20,20,0.05); */ /* Optional tint for dev */
-	}
-</style>

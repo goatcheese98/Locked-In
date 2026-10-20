@@ -219,3 +219,80 @@ test('optional effects and existing dock panels remain available', async ({ page
 	await expect(page.getByRole('dialog', { name: 'Timer settings', exact: true })).toBeVisible();
 	expect(errors).toEqual([]);
 });
+
+for (const width of [320, 1440])
+	for (const theme of ['light', 'dark'] as const) {
+		test(`palette ${width} ${theme} supports keyboard, sync, lock, reset and reload`, async ({
+			page
+		}) => {
+			const errors: string[] = [];
+			page.on('pageerror', (e) => errors.push(e.message));
+			await page.setViewportSize({ width, height: 900 });
+			await page.emulateMedia({ colorScheme: theme, reducedMotion: 'reduce' });
+			await page.goto('/');
+			await expect(page.getByRole('timer')).toHaveText('25:00');
+			const open = async () => {
+				const opener = page.getByRole('button', { name: 'Color Palette', exact: true });
+				await expect(opener).toBeEnabled();
+				await opener.focus();
+				await page.keyboard.press('ArrowRight');
+				await expect(
+					page.getByRole('button', { name: 'Water Effects', exact: true })
+				).toBeFocused();
+				await page.keyboard.press('End');
+				await expect(
+					page.getByRole('button', { name: 'Master Settings', exact: true })
+				).toBeFocused();
+				await page.keyboard.press('Home');
+				await expect(opener).toBeFocused();
+				await page.keyboard.press('Enter');
+				await expect(
+					page.getByRole('heading', { name: 'Color palette', exact: true })
+				).toBeVisible();
+			};
+			await open();
+			const hue = page.getByRole('slider', { name: /^Hue/ });
+			await hue.fill('180');
+			await hue.focus();
+			await page.keyboard.press('ArrowRight');
+			await expect(hue).toHaveValue('181');
+			const bounds = await page
+				.getByRole('region', { name: 'Color palette', exact: true })
+				.boundingBox();
+			expect(bounds).not.toBeNull();
+			expect(bounds!.x).toBeGreaterThanOrEqual(0);
+			expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(width);
+			await page.getByRole('radio', { name: 'Color 2', exact: true }).check();
+			await hue.fill('90');
+			await page.getByLabel('Sync both gradients', { exact: true }).check();
+			await page.getByRole('slider', { name: /^Saturation/ }).fill('42');
+			await expect(page.getByText('Color 1: 181°, 42%, 50%', { exact: true })).toBeVisible();
+			await expect(page.getByText('Color 2: 90°, 42%, 50%', { exact: true })).toBeVisible();
+			await page.getByLabel('Lock colors', { exact: true }).check();
+			for (const slider of await page.getByRole('slider').all())
+				await expect(slider).toBeDisabled();
+			await expect(page.getByRole('button', { name: 'Reset colors', exact: true })).toBeDisabled();
+			await page.getByLabel('Lock colors', { exact: true }).uncheck();
+			await page.getByRole('button', { name: 'Reset colors', exact: true }).click();
+			await expect(page.getByText('Color 1: 210°, 70%, 50%', { exact: true })).toBeVisible();
+			await expect(page.getByText('Color 2: 200°, 68%, 50%', { exact: true })).toBeVisible();
+			await page.evaluate(() => document.fonts.ready);
+			expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+				true
+			);
+			await page.screenshot({
+				path: `docs/design/screens/palette-${width}-${theme}.png`,
+				fullPage: true
+			});
+			await page.getByRole('button', { name: 'Close', exact: true }).click();
+			await expect(page.getByRole('button', { name: 'Color Palette', exact: true })).toBeFocused();
+			await expect(page.getByRole('heading', { name: 'Color palette', exact: true })).toHaveCount(
+				0
+			);
+			await page.reload();
+			await open();
+			await expect(page.getByText('Color 1: 210°, 70%, 50%', { exact: true })).toBeVisible();
+			await expect(page.locator('canvas')).toHaveCount(0);
+			expect(errors).toEqual([]);
+		});
+	}

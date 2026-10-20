@@ -1,14 +1,11 @@
 <script lang="ts">
-	import { 
-		backgroundSettings, 
-		setGradientColor1, 
+	import {
+		backgroundSettings,
+		setGradientColor1,
 		setGradientColor2,
 		getGradientColor1HSL,
 		getGradientColor2HSL
 	} from '$lib/stores/backgroundSettingsStore';
-	import { createEventDispatcher } from 'svelte';
-
-	const dispatch = createEventDispatcher();
 
 	// Grid configuration
 	const HUE_STEPS = 12; // 30° increments
@@ -22,8 +19,8 @@
 	let isDragging = false;
 	let activeGradient: 1 | 2 | null = null;
 
-	$: color1HSL = getGradientColor1HSL();
-	$: color2HSL = getGradientColor2HSL();
+	$: color1HSL = getGradientColor1HSL($backgroundSettings);
+	$: color2HSL = getGradientColor2HSL($backgroundSettings);
 	$: color1H = color1HSL.h;
 	$: color1S = color1HSL.s;
 	$: color1L = color1HSL.l;
@@ -32,21 +29,29 @@
 	$: color2L = color2HSL.l;
 
 	// Generate grid values based on selected component
-	function getGridValues() {
-		switch (selectedComponent) {
+	function getGridValues(component = selectedComponent) {
+		switch (component) {
 			case 'hue':
 				return Array.from({ length: HUE_STEPS }, (_, i) => (i * 360) / HUE_STEPS);
 			case 'saturation':
-				return Array.from({ length: SATURATION_STEPS }, (_, i) => (i * 100) / (SATURATION_STEPS - 1));
+				return Array.from(
+					{ length: SATURATION_STEPS },
+					(_, i) => (i * 100) / (SATURATION_STEPS - 1)
+				);
 			case 'lightness':
-				return Array.from({ length: LIGHTNESS_STEPS }, (_, i) => 20 + (i * 60) / (LIGHTNESS_STEPS - 1));
+				return Array.from(
+					{ length: LIGHTNESS_STEPS },
+					(_, i) => 20 + (i * 60) / (LIGHTNESS_STEPS - 1)
+				);
 		}
 	}
+
+	$: gridValues = getGridValues(selectedComponent);
 
 	// Get color for grid cell
 	function getCellColor(value: number): string {
 		let h, s, l;
-		
+
 		switch (selectedComponent) {
 			case 'hue':
 				h = value;
@@ -66,7 +71,7 @@
 				l = value;
 				break;
 		}
-		
+
 		return `hsl(${h}, ${s}%, ${l}%)`;
 	}
 
@@ -74,44 +79,56 @@
 	function getIndicatorPosition(gradient: 1 | 2) {
 		const values = getGridValues();
 		let currentValue;
-		
+
 		if (gradient === 1) {
-			currentValue = selectedComponent === 'hue' ? color1H :
-						   selectedComponent === 'saturation' ? color1S : color1L;
+			currentValue =
+				selectedComponent === 'hue'
+					? color1H
+					: selectedComponent === 'saturation'
+						? color1S
+						: color1L;
 		} else {
-			currentValue = selectedComponent === 'hue' ? color2H :
-						   selectedComponent === 'saturation' ? color2S : color2L;
+			currentValue =
+				selectedComponent === 'hue'
+					? color2H
+					: selectedComponent === 'saturation'
+						? color2S
+						: color2L;
 		}
-		
+
 		// Find closest value in grid
 		const closestIndex = values.reduce((closest, value, index) => {
-			return Math.abs(value - currentValue) < Math.abs(values[closest] - currentValue) ? index : closest;
+			return Math.abs(value - currentValue) < Math.abs(values[closest] - currentValue)
+				? index
+				: closest;
 		}, 0);
-		
+
 		return closestIndex;
 	}
 
 	// Handle cell click
-	function handleCellClick(value: number, event: MouseEvent) {
+	function handleCellClick(value: number, event: MouseEvent | KeyboardEvent) {
+		if (isLocked) return;
 		if (event.shiftKey || activeGradient === 2) {
 			updateGradientColor(2, value);
 		} else {
 			updateGradientColor(1, value);
 		}
-		
+
 		if (isSynced) {
-			updateGradientColor(activeGradient === 1 ? 2 : 1, value);
+			updateGradientColor(event.shiftKey || activeGradient === 2 ? 1 : 2, value);
 		}
 	}
 
 	// Update gradient color
 	function updateGradientColor(gradient: 1 | 2, value: number) {
-		const currentColor = gradient === 1 ? 
-			{ h: color1H, s: color1S, l: color1L } :
-			{ h: color2H, s: color2S, l: color2L };
-		
+		const currentColor =
+			gradient === 1
+				? { h: color1H, s: color1S, l: color1L }
+				: { h: color2H, s: color2S, l: color2L };
+
 		let newColor = { ...currentColor };
-		
+
 		switch (selectedComponent) {
 			case 'hue':
 				newColor.h = value;
@@ -123,7 +140,7 @@
 				newColor.l = value;
 				break;
 		}
-		
+
 		if (gradient === 1) {
 			setGradientColor1(newColor.h, newColor.s, newColor.l);
 		} else {
@@ -133,45 +150,46 @@
 
 	// Handle drag start
 	function handleDragStart(gradient: 1 | 2, event: MouseEvent) {
+		if (isLocked) return;
 		isDragging = true;
 		activeGradient = gradient;
 		event.preventDefault();
-		
+
 		// Add mouse move and mouse up listeners for dragging
 		const handleMouseMove = (e: MouseEvent) => {
 			if (!isDragging) return;
-			
+
 			// Find the grid cell under the mouse
 			const gridContainer = (event.target as HTMLElement).closest('.color-grid');
 			if (!gridContainer) return;
-			
+
 			const rect = gridContainer.getBoundingClientRect();
 			const x = e.clientX - rect.left;
 			const y = e.clientY - rect.top;
-			
+
 			// Calculate which cell the mouse is over
 			const cellsPerRow = 6;
 			const cellWidth = rect.width / cellsPerRow;
 			const cellHeight = cellWidth; // Assuming square cells
-			
+
 			const col = Math.floor(x / cellWidth);
 			const row = Math.floor(y / cellHeight);
 			const cellIndex = row * cellsPerRow + col;
-			
+
 			const values = getGridValues();
 			if (cellIndex >= 0 && cellIndex < values.length) {
 				const value = values[cellIndex];
 				updateGradientColor(gradient, value);
 			}
 		};
-		
+
 		const handleMouseUp = () => {
 			isDragging = false;
 			activeGradient = null;
 			document.removeEventListener('mousemove', handleMouseMove);
 			document.removeEventListener('mouseup', handleMouseUp);
 		};
-		
+
 		document.addEventListener('mousemove', handleMouseMove);
 		document.addEventListener('mouseup', handleMouseUp);
 	}
@@ -197,51 +215,47 @@
 	<!-- Header Controls -->
 	<div class="grid-header">
 		<div class="component-selector">
-			<button 
-				class="component-btn" 
+			<button
+				class="component-btn"
 				class:active={selectedComponent === 'hue'}
-				on:click={() => selectedComponent = 'hue'}
+				on:click={() => (selectedComponent = 'hue')}
 			>
 				H
 			</button>
-			<button 
-				class="component-btn" 
+			<button
+				class="component-btn"
 				class:active={selectedComponent === 'saturation'}
-				on:click={() => selectedComponent = 'saturation'}
+				on:click={() => (selectedComponent = 'saturation')}
 			>
 				S
 			</button>
-			<button 
-				class="component-btn" 
+			<button
+				class="component-btn"
 				class:active={selectedComponent === 'lightness'}
-				on:click={() => selectedComponent = 'lightness'}
+				on:click={() => (selectedComponent = 'lightness')}
 			>
 				L
 			</button>
 		</div>
-		
+
 		<div class="control-buttons">
-			<button 
-				class="control-btn" 
+			<button
+				class="control-btn"
 				class:active={isSynced}
 				on:click={toggleSync}
 				title="Sync both gradients"
 			>
 				🔗
 			</button>
-			<button 
-				class="control-btn" 
+			<button
+				class="control-btn"
 				class:active={isLocked}
 				on:click={toggleLock}
 				title="Lock current selection"
 			>
 				🔒
 			</button>
-			<button 
-				class="control-btn reset-btn" 
-				on:click={resetColors}
-				title="Reset to defaults"
-			>
+			<button class="control-btn reset-btn" on:click={resetColors} title="Reset to defaults">
 				↺
 			</button>
 		</div>
@@ -249,19 +263,36 @@
 
 	<!-- Color Grid -->
 	<div class="color-grid">
-		{#each getGridValues() as value, index}
-			<div 
+		{#each gridValues as value, index (value)}
+			<div
 				class="grid-cell"
 				style="background-color: {getCellColor(value)}"
 				on:click={(e) => handleCellClick(value, e)}
+				on:keydown={(event) => {
+					if (event.target !== event.currentTarget || !['Enter', ' '].includes(event.key)) return;
+					event.preventDefault();
+					handleCellClick(value, event);
+				}}
 				role="button"
 				tabindex="0"
 				title="{selectedComponent.toUpperCase()}: {Math.round(value)}"
 			>
 				<!-- Gradient 1 Indicator -->
 				{#if getIndicatorPosition(1) === index}
-					<div 
+					<div
 						class="gradient-indicator gradient-1"
+						on:keydown={(event) => {
+							const offset = event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0;
+							if (!offset || isLocked) return;
+							event.stopPropagation();
+							event.preventDefault();
+							const values = getGridValues();
+							const index = Math.max(
+								0,
+								Math.min(values.length - 1, getIndicatorPosition(1) + offset)
+							);
+							updateGradientColor(1, values[index]);
+						}}
 						on:mousedown={(e) => {
 							e.stopPropagation();
 							handleDragStart(1, e);
@@ -273,11 +304,23 @@
 						1
 					</div>
 				{/if}
-				
+
 				<!-- Gradient 2 Indicator -->
 				{#if getIndicatorPosition(2) === index}
-					<div 
+					<div
 						class="gradient-indicator gradient-2"
+						on:keydown={(event) => {
+							const offset = event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0;
+							if (!offset || isLocked) return;
+							event.stopPropagation();
+							event.preventDefault();
+							const values = getGridValues();
+							const index = Math.max(
+								0,
+								Math.min(values.length - 1, getIndicatorPosition(2) + offset)
+							);
+							updateGradientColor(2, values[index]);
+						}}
 						on:mousedown={(e) => {
 							e.stopPropagation();
 							handleDragStart(2, e);
@@ -296,7 +339,7 @@
 	<!-- Current Colors Preview -->
 	<div class="color-preview">
 		<div class="preview-item">
-			<div 
+			<div
 				class="preview-swatch"
 				style="background-color: hsl({color1H}, {color1S}%, {color1L}%)"
 			></div>
@@ -305,7 +348,7 @@
 			</span>
 		</div>
 		<div class="preview-item">
-			<div 
+			<div
 				class="preview-swatch"
 				style="background-color: hsl({color2H}, {color2S}%, {color2L}%)"
 			></div>
@@ -510,11 +553,11 @@
 			min-width: 280px;
 			padding: 12px;
 		}
-		
+
 		.color-grid {
 			grid-template-columns: repeat(4, 1fr);
 		}
-		
+
 		.component-btn {
 			padding: 6px 10px;
 			font-size: 12px;

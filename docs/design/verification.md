@@ -26,15 +26,15 @@ repositories were not edited. No embedded credentials were used.
 
 Node 24.19.0; system Chromium in cloud; writable npm cache.
 
-| Command | Exit | Result |
-| --- | --- | --- |
-| `npm test` | 0 | 4 strict TypeScript timer/storage regression tests passed |
-| `npm run check` | 0 | Zero errors; 59 existing warnings in older effect controls |
-| `npm run lint:focus` | 0 | Changed source/test Prettier and ESLint passed |
-| `CHROMIUM_PATH=/usr/bin/chromium npm run test:e2e` | 0 | 14 passed: timing, cycles, settings, storage, keyboard, effects-density, and six viewport/theme combinations |
-| `npm run build` | 0 | Static adapter emitted `docs`, with bundled fonts |
-| Cloud static `/Locked-In/` browser smoke | 0 | HTTP 200; start/pause/resume, persisted dark theme, bundled Geist, no page errors |
-| `npm run lint` | 1 | Existing repository-wide formatting backlog |
+| Command                                            | Exit | Result                                                                                                       |
+| -------------------------------------------------- | ---- | ------------------------------------------------------------------------------------------------------------ |
+| `npm test`                                         | 0    | 4 strict TypeScript timer/storage regression tests passed                                                    |
+| `npm run check`                                    | 0    | Zero errors; 59 existing warnings in older effect controls                                                   |
+| `npm run lint:focus`                               | 0    | Changed source/test Prettier and ESLint passed                                                               |
+| `CHROMIUM_PATH=/usr/bin/chromium npm run test:e2e` | 0    | 14 passed: timing, cycles, settings, storage, keyboard, effects-density, and six viewport/theme combinations |
+| `npm run build`                                    | 0    | Static adapter emitted `docs`, with bundled fonts                                                            |
+| Cloud static `/Locked-In/` browser smoke           | 0    | HTTP 200; start/pause/resume, persisted dark theme, bundled Geist, no page errors                            |
+| `npm run lint`                                     | 1    | Existing repository-wide formatting backlog                                                                  |
 
 Initial browser checks exposed a Tab-wrap failure, fixed with explicit modal
 containment. Header controls stay disabled until mount so early clicks cannot
@@ -59,3 +59,9 @@ explicit base-path decision and another static-route check before deployment.
 No adapter change, credential, provider call, merge, deployment, release, or package
 publishing is included. Existing automatic PR previews may run. No Paper-export
 PNG was supplied; see the candidate status in [focus-v1.md](focus-v1.md).
+
+## Handwritten-source debt follow-up
+
+The first-pass 59-warning and formatting limits above are historical. See
+[debt-inventory.md](debt-inventory.md) for the fresh inventory, fixes, stricter
+quality gates and full-project results on the follow-up commits in this draft.

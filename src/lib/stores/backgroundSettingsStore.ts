@@ -132,14 +132,20 @@ function parseHslString(
 
 // NEW: Function for controlled random step
 // Helper functions to get individual HSL values from stored colors
-export function getGradientColor1HSL(): { h: number; s: number; l: number } {
-	const current = get(backgroundSettings);
+export function getGradientColor1HSL(current: BackgroundSettings = get(backgroundSettings)): {
+	h: number;
+	s: number;
+	l: number;
+} {
 	const parsed = parseHslString(current.gradientColor1);
 	return parsed || { h: 210, s: 70, l: 50 }; // fallback
 }
 
-export function getGradientColor2HSL(): { h: number; s: number; l: number } {
-	const current = get(backgroundSettings);
+export function getGradientColor2HSL(current: BackgroundSettings = get(backgroundSettings)): {
+	h: number;
+	s: number;
+	l: number;
+} {
 	const parsed = parseHslString(current.gradientColor2);
 	return parsed || { h: 200, s: 68, l: 50 }; // fallback
 }

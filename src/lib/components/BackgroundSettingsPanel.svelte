@@ -128,16 +128,17 @@
 </script>
 
 <!-- Moved HTML Form Structure -->
-<form on:submit|preventDefault class="mb-8 space-y-4">
+<form onsubmit={(event) => event.preventDefault()} class="mb-8 space-y-4">
 	<!-- Gradient Color 1 Controls -->
 	<div>
-		<label class="mb-1 block text-sm font-medium text-gray-300">Gradient Color 1 (HSL)</label>
+		<p class="mb-1 block text-sm font-medium text-gray-300">Gradient Color 1 (HSL)</p>
 		<div class="mb-1.5 flex items-center space-x-1.5">
 			<button
 				type="button"
-				on:click={onPrev1}
+				onclick={onPrev1}
 				disabled={!canGoPrev1}
 				title="Previous Color 1"
+				aria-label="Previous Color 1"
 				class="control-button icon-button"
 			>
 				<svg
@@ -159,9 +160,10 @@
 			</div>
 			<button
 				type="button"
-				on:click={onNext1}
+				onclick={onNext1}
 				disabled={!canGoNext1}
 				title="Next Color 1"
+				aria-label="Next Color 1"
 				class="control-button icon-button"
 			>
 				<svg
@@ -178,8 +180,9 @@
 			</button>
 			<button
 				type="button"
-				on:click={onRandom1}
+				onclick={onRandom1}
 				title="Randomize Color 1"
+				aria-label="Randomize Color 1"
 				class="control-button icon-button random-button"
 			>
 				<svg
@@ -202,9 +205,9 @@
 					type="range"
 					id="c1-h"
 					bind:value={color1H}
-					on:input={handleSliderInput1}
-					on:pointerdown={onPointerDown1}
-					on:pointerup={onPointerUp1}
+					oninput={handleSliderInput1}
+					onpointerdown={onPointerDown1}
+					onpointerup={onPointerUp1}
 					min="0"
 					max="360"
 					class="slider hue-slider"
@@ -217,9 +220,9 @@
 					type="range"
 					id="c1-s"
 					bind:value={color1S}
-					on:input={handleSliderInput1}
-					on:pointerdown={onPointerDown1}
-					on:pointerup={onPointerUp1}
+					oninput={handleSliderInput1}
+					onpointerdown={onPointerDown1}
+					onpointerup={onPointerUp1}
 					min="0"
 					max="100"
 					class="slider saturation-slider"
@@ -232,9 +235,9 @@
 					type="range"
 					id="c1-l"
 					bind:value={color1L}
-					on:input={handleSliderInput1}
-					on:pointerdown={onPointerDown1}
-					on:pointerup={onPointerUp1}
+					oninput={handleSliderInput1}
+					onpointerdown={onPointerDown1}
+					onpointerup={onPointerUp1}
 					min="0"
 					max="100"
 					class="slider lightness-slider"
@@ -249,7 +252,7 @@
 					id="auto-cycle-1"
 					type="checkbox"
 					bind:checked={isAutoCycling1}
-					on:change={onToggleAutoCycle1}
+					onchange={onToggleAutoCycle1}
 					class="toggle-input"
 				/>
 				<span class="toggle-track">
@@ -262,13 +265,14 @@
 
 	<!-- Gradient Color 2 Controls -->
 	<div>
-		<label class="mb-1 block text-sm font-medium text-gray-300">Gradient Color 2 (HSL)</label>
+		<p class="mb-1 block text-sm font-medium text-gray-300">Gradient Color 2 (HSL)</p>
 		<div class="mb-1.5 flex items-center space-x-1.5">
 			<button
 				type="button"
-				on:click={onPrev2}
+				onclick={onPrev2}
 				disabled={!canGoPrev2}
 				title="Previous Color 2"
+				aria-label="Previous Color 2"
 				class="control-button icon-button"
 			>
 				<svg
@@ -290,9 +294,10 @@
 			</div>
 			<button
 				type="button"
-				on:click={onNext2}
+				onclick={onNext2}
 				disabled={!canGoNext2}
 				title="Next Color 2"
+				aria-label="Next Color 2"
 				class="control-button icon-button"
 			>
 				<svg
@@ -309,8 +314,9 @@
 			</button>
 			<button
 				type="button"
-				on:click={onRandom2}
+				onclick={onRandom2}
 				title="Randomize Color 2"
+				aria-label="Randomize Color 2"
 				class="control-button icon-button random-button"
 			>
 				<svg
@@ -333,9 +339,9 @@
 					type="range"
 					id="c2-h"
 					bind:value={color2H}
-					on:input={handleSliderInput2}
-					on:pointerdown={onPointerDown2}
-					on:pointerup={onPointerUp2}
+					oninput={handleSliderInput2}
+					onpointerdown={onPointerDown2}
+					onpointerup={onPointerUp2}
 					min="0"
 					max="360"
 					class="slider hue-slider"
@@ -348,9 +354,9 @@
 					type="range"
 					id="c2-s"
 					bind:value={color2S}
-					on:input={handleSliderInput2}
-					on:pointerdown={onPointerDown2}
-					on:pointerup={onPointerUp2}
+					oninput={handleSliderInput2}
+					onpointerdown={onPointerDown2}
+					onpointerup={onPointerUp2}
 					min="0"
 					max="100"
 					class="slider saturation-slider"
@@ -363,9 +369,9 @@
 					type="range"
 					id="c2-l"
 					bind:value={color2L}
-					on:input={handleSliderInput2}
-					on:pointerdown={onPointerDown2}
-					on:pointerup={onPointerUp2}
+					oninput={handleSliderInput2}
+					onpointerdown={onPointerDown2}
+					onpointerup={onPointerUp2}
 					min="0"
 					max="100"
 					class="slider lightness-slider"
@@ -380,7 +386,7 @@
 					id="auto-cycle-2"
 					type="checkbox"
 					bind:checked={isAutoCycling2}
-					on:change={onToggleAutoCycle2}
+					onchange={onToggleAutoCycle2}
 					class="toggle-input"
 				/>
 				<span class="toggle-track">
@@ -398,7 +404,7 @@
 				id="enable-floating"
 				type="checkbox"
 				bind:checked={isFloatingEnabled}
-				on:change={handleToggleFloating}
+				onchange={handleToggleFloating}
 				class="toggle-input"
 			/>
 			<span class="toggle-track">
@@ -410,7 +416,7 @@
 
 	<!-- Reset Button -->
 	<div class="pt-2">
-		<button type="button" on:click={onResetDefaults} class="control-button reset-button">
+		<button type="button" onclick={onResetDefaults} class="control-button reset-button">
 			Reset to Defaults
 		</button>
 	</div>
@@ -574,50 +580,6 @@
 	}
 
 	/* Checkbox Styles */
-	.custom-checkbox {
-		appearance: none;
-		-webkit-appearance: none;
-		height: 1rem;
-		width: 1rem;
-		display: inline-block;
-		vertical-align: middle;
-		position: relative;
-		cursor: pointer;
-		border-radius: 0.25rem;
-		background-color: hsla(220, 13%, 45%, 0.8);
-		border: 1px solid hsla(217, 33%, 50%, 0.7);
-		outline: none;
-		transition:
-			background-color 0.15s ease-in-out,
-			border-color 0.15s ease-in-out,
-			box-shadow 0.15s ease-in-out;
-		/* Checkmark SVG (white) */
-		background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
-		background-size: 0% 0%;
-		background-position: 50% 50%;
-		background-repeat: no-repeat;
-	}
-
-	.custom-checkbox:checked {
-		background-color: #0d9488;
-		border-color: #0f766e;
-		background-size: 100% 100%;
-	}
-
-	.custom-checkbox:focus-visible {
-		box-shadow:
-			0 0 0 2px hsl(215, 27%, 17%),
-			0 0 0 4px hsla(174, 72%, 56%, 0.6);
-	}
-
-	.checkbox-label {
-		margin-left: 0.75rem;
-		display: block;
-		font-size: 0.875rem;
-		color: #d1d5db;
-		cursor: pointer;
-		user-select: none;
-	}
 
 	/* NEW Animated Toggle Switch Styles */
 	.toggle-switch {

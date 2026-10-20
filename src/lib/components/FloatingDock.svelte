@@ -8,7 +8,29 @@
 	import LightEffectsPanel from './LightEffectsPanel.svelte';
 
 	export let onTimerSettings: (() => void) | undefined = undefined;
+	let ready = false;
 	let isVisible = false;
+	let panelContainer: HTMLDivElement;
+	let dockElement: HTMLDivElement;
+	let focusedIndex = 0;
+	function dockKeys(event: KeyboardEvent) {
+		if (!(event.target instanceof HTMLElement) || !event.target.closest('.dock-item')) return;
+		const buttons = Array.from(dockElement.querySelectorAll<HTMLButtonElement>('.dock-item'));
+		const index = buttons.indexOf(event.target.closest('button') as HTMLButtonElement);
+		const next =
+			event.key === 'ArrowRight'
+				? (index + 1) % buttons.length
+				: event.key === 'ArrowLeft'
+					? (index + buttons.length - 1) % buttons.length
+					: event.key === 'Home'
+						? 0
+						: event.key === 'End'
+							? buttons.length - 1
+							: -1;
+		if (next < 0) return;
+		event.preventDefault();
+		buttons[next]?.focus();
+	}
 	let hideTimeout: number;
 	let mouseY = 0;
 	let windowHeight = 0;
@@ -24,6 +46,7 @@
 	const AUTO_HIDE_DELAY = 3000; // ms before auto-hide
 
 	onMount(() => {
+		ready = true;
 		const handleMouseMove = (e: MouseEvent) => {
 			mouseY = e.clientY;
 			checkVisibility();
@@ -97,12 +120,16 @@
 	}
 
 	function closeAllPanels() {
+		const returnFocus = panelContainer?.contains(document.activeElement);
+		const previousPanel = activePanel;
 		showColorGrid = false;
 		showTimerSettings = false;
 		showWaterEffects = false;
 		showLightEffects = false;
 		showParticleEffects = false;
 		showMasterSettings = false;
+		if (returnFocus && previousPanel)
+			dockElement.querySelector<HTMLButtonElement>(`[data-panel="${previousPanel}"]`)?.focus();
 		checkVisibility();
 	}
 
@@ -214,6 +241,8 @@
 </script>
 
 <div
+	bind:this={dockElement}
+	on:keydown={dockKeys}
 	class="effects-dock fixed bottom-4 left-1/2 z-50 -translate-x-1/2 transition-all duration-300 ease-in-out"
 	class:translate-y-20={!isVisible}
 	class:opacity-0={!isVisible}
@@ -222,12 +251,17 @@
 	on:mouseenter={handleDockMouseEnter}
 	on:mouseleave={handleDockMouseLeave}
 	role="toolbar"
+	tabindex="-1"
 	aria-label="Background Effects Dock"
 >
 	<div class="flex items-end justify-center gap-2" on:mouseleave={handleMouseLeave} role="group">
 		{#each dockItems as item, index (item.id)}
 			<button
 				class="dock-item"
+				disabled={!ready}
+				data-panel={item.id}
+				tabindex={index === focusedIndex ? 0 : -1}
+				on:focus={() => (focusedIndex = index)}
 				class:active={activePanel === item.id}
 				title={item.title}
 				on:click={() => togglePanel(item.id)}
@@ -243,7 +277,7 @@
 	</div>
 
 	<!-- Panels -->
-	<div class="panel-container" class:visible={activePanel}>
+	<div bind:this={panelContainer} class="panel-container" class:visible={activePanel}>
 		{#if showColorGrid}
 			<ProfessionalHSLPicker on:close={closeAllPanels} />
 		{/if}
@@ -272,7 +306,6 @@
 <style>
 	.effects-dock:focus-within {
 		opacity: 1 !important;
-		transform: translateX(-50%) !important;
 		pointer-events: auto !important;
 	}
 	@media (max-width: 767px) {

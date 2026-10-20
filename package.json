@@ -8,13 +8,13 @@
 		"build": "vite build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
-		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --fail-on-warnings",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"format": "prettier --write .",
-		"lint": "prettier --check . && eslint .",
+		"lint": "prettier --check src tests *.ts *.js .github docs/design README.md && eslint src tests *.ts *.js",
 		"test:e2e": "playwright test",
 		"test": "node --experimental-strip-types tests/timer.test.ts",
-		"lint:focus": "prettier --check src/lib/stores/timerStore.ts src/lib/stores/backgroundSettingsStore.ts src/lib/components/TimerSettings.svelte src/lib/components/TimerControls.svelte src/lib/components/TimerDisplay.svelte src/routes/+page.svelte src/routes/+layout.svelte src/lib/components/FloatingDock.svelte src/lib/components/background/animationState.ts src/lib/components/background/effects/waterGrains.ts playwright.config.ts tests/focus.spec.ts tests/timer.test.ts src/app.css && eslint src/lib/stores/timerStore.ts src/lib/stores/backgroundSettingsStore.ts src/lib/components/TimerSettings.svelte src/lib/components/TimerControls.svelte src/lib/components/TimerDisplay.svelte src/routes/+page.svelte src/routes/+layout.svelte src/lib/components/FloatingDock.svelte src/lib/components/background/animationState.ts src/lib/components/background/effects/waterGrains.ts playwright.config.ts tests/focus.spec.ts tests/timer.test.ts"
+		"lint:focus": "npm run lint"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.2.5",

@@ -1,15 +1,19 @@
 <script lang="ts">
+	import type { BackgroundSettings } from '$lib/stores/backgroundSettingsStore';
 	import { backgroundSettings } from '$lib/stores/backgroundSettingsStore';
-	
+
 	$: settings = $backgroundSettings;
-	
-	function updateWaterSetting(key: string, value: any) {
-		backgroundSettings.update(s => ({
+
+	function updateWaterSetting<K extends keyof BackgroundSettings>(
+		key: K,
+		value: BackgroundSettings[K]
+	) {
+		backgroundSettings.update((s) => ({
 			...s,
 			[key]: value
 		}));
 	}
-	
+
 	// Reset to defaults
 	function resetDefaults() {
 		updateWaterSetting('ripplesEnabled', true);
@@ -25,7 +29,7 @@
 
 <div class="effects-panel">
 	<h3 class="panel-title">Water Effects</h3>
-	
+
 	<!-- Ripples Section -->
 	<div class="effect-section">
 		<div class="section-header">
@@ -40,13 +44,14 @@
 				<span class="toggle-label">Enable</span>
 			</label>
 		</div>
-		
+
 		{#if settings.ripplesEnabled}
 			<div class="controls-grid">
 				<div class="control-item">
-					<label class="control-label">Size</label>
+					<label for="rippleSize" class="control-label">Size</label>
 					<div class="slider-container">
 						<input
+							id="rippleSize"
 							type="range"
 							value={settings.rippleSize}
 							on:input={(e) => updateWaterSetting('rippleSize', parseInt(e.currentTarget.value))}
@@ -57,11 +62,12 @@
 						<span class="value-display">{settings.rippleSize}</span>
 					</div>
 				</div>
-				
+
 				<div class="control-item">
-					<label class="control-label">Speed</label>
+					<label for="rippleSpeed" class="control-label">Speed</label>
 					<div class="slider-container">
 						<input
+							id="rippleSpeed"
 							type="range"
 							value={settings.rippleSpeed}
 							on:input={(e) => updateWaterSetting('rippleSpeed', parseFloat(e.currentTarget.value))}
@@ -73,26 +79,33 @@
 						<span class="value-display">{settings.rippleSpeed.toFixed(2)}</span>
 					</div>
 				</div>
-				
+
 				<div class="control-item">
-					<label class="control-label">Ambient Frequency</label>
+					<label for="rippleFrequency" class="control-label">Ambient Frequency</label>
 					<div class="slider-container">
 						<input
+							id="rippleFrequency"
 							type="range"
 							value={10000 - settings.rippleFrequency + 1000}
-							on:input={(e) => updateWaterSetting('rippleFrequency', 10000 - parseInt(e.currentTarget.value) + 1000)}
+							on:input={(e) =>
+								updateWaterSetting(
+									'rippleFrequency',
+									10000 - parseInt(e.currentTarget.value) + 1000
+								)}
 							min="1000"
 							max="10000"
 							step="500"
 							class="slider"
 						/>
-						<span class="value-display">{Math.round((10000 - settings.rippleFrequency + 1000) / 1000 * 10) / 10}/10</span>
+						<span class="value-display"
+							>{Math.round(((10000 - settings.rippleFrequency + 1000) / 1000) * 10) / 10}/10</span
+						>
 					</div>
 				</div>
 			</div>
 		{/if}
 	</div>
-	
+
 	<!-- Shimmer Section -->
 	<div class="effect-section">
 		<div class="section-header">
@@ -107,16 +120,18 @@
 				<span class="toggle-label">Enable</span>
 			</label>
 		</div>
-		
+
 		{#if settings.shimmerEnabled}
 			<div class="controls-grid">
 				<div class="control-item">
-					<label class="control-label">Intensity</label>
+					<label for="shimmerIntensity" class="control-label">Intensity</label>
 					<div class="slider-container">
 						<input
+							id="shimmerIntensity"
 							type="range"
 							value={settings.shimmerIntensity}
-							on:input={(e) => updateWaterSetting('shimmerIntensity', parseFloat(e.currentTarget.value))}
+							on:input={(e) =>
+								updateWaterSetting('shimmerIntensity', parseFloat(e.currentTarget.value))}
 							min="0.1"
 							max="1.0"
 							step="0.05"
@@ -125,14 +140,16 @@
 						<span class="value-display">{Math.round(settings.shimmerIntensity * 100)}%</span>
 					</div>
 				</div>
-				
+
 				<div class="control-item">
-					<label class="control-label">Speed</label>
+					<label for="shimmerSpeed" class="control-label">Speed</label>
 					<div class="slider-container">
 						<input
+							id="shimmerSpeed"
 							type="range"
 							value={settings.shimmerSpeed}
-							on:input={(e) => updateWaterSetting('shimmerSpeed', parseFloat(e.currentTarget.value))}
+							on:input={(e) =>
+								updateWaterSetting('shimmerSpeed', parseFloat(e.currentTarget.value))}
 							min="0.5"
 							max="2.0"
 							step="0.1"
@@ -141,11 +158,12 @@
 						<span class="value-display">{settings.shimmerSpeed.toFixed(1)}x</span>
 					</div>
 				</div>
-				
+
 				<div class="control-item">
-					<label class="control-label">Count</label>
+					<label for="shimmerCount" class="control-label">Count</label>
 					<div class="slider-container">
 						<input
+							id="shimmerCount"
 							type="range"
 							value={settings.shimmerCount}
 							on:input={(e) => updateWaterSetting('shimmerCount', parseInt(e.currentTarget.value))}
@@ -159,14 +177,8 @@
 			</div>
 		{/if}
 	</div>
-	
-	<button
-		type="button"
-		on:click={resetDefaults}
-		class="reset-button"
-	>
-		Reset to Defaults
-	</button>
+
+	<button type="button" on:click={resetDefaults} class="reset-button"> Reset to Defaults </button>
 </div>
 
 <style>
@@ -357,7 +369,7 @@
 			min-width: 340px;
 			padding: 20px;
 		}
-		
+
 		.effect-section {
 			padding: 16px;
 		}
