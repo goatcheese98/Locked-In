@@ -1,15 +1,19 @@
 <script lang="ts">
+	import type { BackgroundSettings } from '$lib/stores/backgroundSettingsStore';
 	import { backgroundSettings } from '$lib/stores/backgroundSettingsStore';
-	
+
 	$: settings = $backgroundSettings;
-	
-	function updateParticleSetting(key: string, value: any) {
-		backgroundSettings.update(s => ({
+
+	function updateParticleSetting<K extends keyof BackgroundSettings>(
+		key: K,
+		value: BackgroundSettings[K]
+	) {
+		backgroundSettings.update((s) => ({
 			...s,
 			[key]: value
 		}));
 	}
-	
+
 	// Reset to defaults
 	function resetDefaults() {
 		updateParticleSetting('waterGrainsEnabled', true);
@@ -29,7 +33,7 @@
 
 <div class="effects-panel">
 	<h3 class="panel-title">Particle Effects</h3>
-	
+
 	<!-- Water Grains Section -->
 	<div class="effect-section">
 		<div class="section-header">
@@ -44,7 +48,7 @@
 				<span class="toggle-label">Enable</span>
 			</label>
 		</div>
-		
+
 		{#if settings.waterGrainsEnabled}
 			<div class="controls-grid">
 				<div class="control-item">
@@ -54,7 +58,8 @@
 							id="grain-density"
 							type="range"
 							value={settings.grainDensity}
-							on:input={(e) => updateParticleSetting('grainDensity', parseInt(e.currentTarget.value))}
+							on:input={(e) =>
+								updateParticleSetting('grainDensity', parseInt(e.currentTarget.value))}
 							min="100"
 							max="1200"
 							step="50"
@@ -63,7 +68,7 @@
 						<span class="value-display">{settings.grainDensity}</span>
 					</div>
 				</div>
-				
+
 				<div class="control-item">
 					<label for="grain-speed" class="control-label">Speed</label>
 					<div class="slider-container">
@@ -71,7 +76,8 @@
 							id="grain-speed"
 							type="range"
 							value={settings.grainSpeed}
-							on:input={(e) => updateParticleSetting('grainSpeed', parseFloat(e.currentTarget.value))}
+							on:input={(e) =>
+								updateParticleSetting('grainSpeed', parseFloat(e.currentTarget.value))}
 							min="0.05"
 							max="0.25"
 							step="0.01"
@@ -80,7 +86,7 @@
 						<span class="value-display">{settings.grainSpeed.toFixed(2)}</span>
 					</div>
 				</div>
-				
+
 				<div class="control-item">
 					<label for="grain-size" class="control-label">Size</label>
 					<div class="slider-container">
@@ -88,7 +94,8 @@
 							id="grain-size"
 							type="range"
 							value={settings.grainSize}
-							on:input={(e) => updateParticleSetting('grainSize', parseFloat(e.currentTarget.value))}
+							on:input={(e) =>
+								updateParticleSetting('grainSize', parseFloat(e.currentTarget.value))}
 							min="0.5"
 							max="1.25"
 							step="0.05"
@@ -97,7 +104,7 @@
 						<span class="value-display">{settings.grainSize.toFixed(2)}</span>
 					</div>
 				</div>
-				
+
 				<div class="control-item">
 					<label for="grain-opacity" class="control-label">Opacity</label>
 					<div class="slider-container">
@@ -105,7 +112,8 @@
 							id="grain-opacity"
 							type="range"
 							value={settings.grainOpacity}
-							on:input={(e) => updateParticleSetting('grainOpacity', parseFloat(e.currentTarget.value))}
+							on:input={(e) =>
+								updateParticleSetting('grainOpacity', parseFloat(e.currentTarget.value))}
 							min="0.1"
 							max="0.8"
 							step="0.05"
@@ -114,7 +122,7 @@
 						<span class="value-display">{Math.round(settings.grainOpacity * 100)}%</span>
 					</div>
 				</div>
-				
+
 				<div class="control-item">
 					<label for="grain-lightness" class="control-label">Lightness</label>
 					<div class="slider-container">
@@ -122,7 +130,8 @@
 							id="grain-lightness"
 							type="range"
 							value={settings.grainLightness}
-							on:input={(e) => updateParticleSetting('grainLightness', parseInt(e.currentTarget.value))}
+							on:input={(e) =>
+								updateParticleSetting('grainLightness', parseInt(e.currentTarget.value))}
 							min="20"
 							max="90"
 							step="5"
@@ -134,7 +143,7 @@
 			</div>
 		{/if}
 	</div>
-	
+
 	<!-- Foam Streaks Section -->
 	<div class="effect-section">
 		<div class="section-header">
@@ -149,7 +158,7 @@
 				<span class="toggle-label">Enable</span>
 			</label>
 		</div>
-		
+
 		{#if settings.foamEnabled}
 			<div class="controls-grid">
 				<div class="control-item">
@@ -159,7 +168,8 @@
 							id="foam-frequency"
 							type="range"
 							value={settings.foamFrequency}
-							on:input={(e) => updateParticleSetting('foamFrequency', parseFloat(e.currentTarget.value))}
+							on:input={(e) =>
+								updateParticleSetting('foamFrequency', parseFloat(e.currentTarget.value))}
 							min="0.005"
 							max="0.15"
 							step="0.005"
@@ -168,7 +178,7 @@
 						<span class="value-display">{(settings.foamFrequency * 100).toFixed(1)}%</span>
 					</div>
 				</div>
-				
+
 				<div class="control-item">
 					<label for="foam-lifetime" class="control-label">Lifetime</label>
 					<div class="slider-container">
@@ -176,7 +186,8 @@
 							id="foam-lifetime"
 							type="range"
 							value={settings.foamLifetime}
-							on:input={(e) => updateParticleSetting('foamLifetime', parseInt(e.currentTarget.value))}
+							on:input={(e) =>
+								updateParticleSetting('foamLifetime', parseInt(e.currentTarget.value))}
 							min="300"
 							max="1200"
 							step="50"
@@ -185,7 +196,7 @@
 						<span class="value-display">{(settings.foamLifetime / 60).toFixed(1)}s</span>
 					</div>
 				</div>
-				
+
 				<div class="control-item">
 					<label for="foam-complexity" class="control-label">Complexity</label>
 					<div class="slider-container">
@@ -193,7 +204,8 @@
 							id="foam-complexity"
 							type="range"
 							value={settings.foamComplexity}
-							on:input={(e) => updateParticleSetting('foamComplexity', parseInt(e.currentTarget.value))}
+							on:input={(e) =>
+								updateParticleSetting('foamComplexity', parseInt(e.currentTarget.value))}
 							min="25"
 							max="100"
 							step="5"
@@ -202,7 +214,7 @@
 						<span class="value-display">{settings.foamComplexity}</span>
 					</div>
 				</div>
-				
+
 				<div class="control-item">
 					<label for="foam-branchiness" class="control-label">Branchiness</label>
 					<div class="slider-container">
@@ -210,7 +222,8 @@
 							id="foam-branchiness"
 							type="range"
 							value={settings.foamBranchiness}
-							on:input={(e) => updateParticleSetting('foamBranchiness', parseFloat(e.currentTarget.value))}
+							on:input={(e) =>
+								updateParticleSetting('foamBranchiness', parseFloat(e.currentTarget.value))}
 							min="0"
 							max="0.5"
 							step="0.05"
@@ -219,7 +232,7 @@
 						<span class="value-display">{Math.round(settings.foamBranchiness * 100)}%</span>
 					</div>
 				</div>
-				
+
 				<div class="control-item">
 					<label for="foam-animation-speed" class="control-label">Animation Speed</label>
 					<div class="slider-container">
@@ -227,7 +240,8 @@
 							id="foam-animation-speed"
 							type="range"
 							value={settings.foamAnimationSpeed || 1.0}
-							on:input={(e) => updateParticleSetting('foamAnimationSpeed', parseFloat(e.currentTarget.value))}
+							on:input={(e) =>
+								updateParticleSetting('foamAnimationSpeed', parseFloat(e.currentTarget.value))}
 							min="0.2"
 							max="3.0"
 							step="0.1"
@@ -236,7 +250,7 @@
 						<span class="value-display">{(settings.foamAnimationSpeed || 1.0).toFixed(1)}x</span>
 					</div>
 				</div>
-				
+
 				<div class="control-item">
 					<label for="foam-opacity" class="control-label">Opacity</label>
 					<div class="slider-container">
@@ -244,7 +258,8 @@
 							id="foam-opacity"
 							type="range"
 							value={settings.foamOpacity}
-							on:input={(e) => updateParticleSetting('foamOpacity', parseFloat(e.currentTarget.value))}
+							on:input={(e) =>
+								updateParticleSetting('foamOpacity', parseFloat(e.currentTarget.value))}
 							min="0.3"
 							max="1.0"
 							step="0.05"
@@ -256,14 +271,8 @@
 			</div>
 		{/if}
 	</div>
-	
-	<button
-		type="button"
-		on:click={resetDefaults}
-		class="reset-button"
-	>
-		Reset to Defaults
-	</button>
+
+	<button type="button" on:click={resetDefaults} class="reset-button"> Reset to Defaults </button>
 </div>
 
 <style>
@@ -458,7 +467,7 @@
 			min-width: 340px;
 			padding: 20px;
 		}
-		
+
 		.effect-section {
 			padding: 16px;
 		}

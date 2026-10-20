@@ -1,0 +1,6 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "locked-in",
+	"pages_build_output_dir": "./build/cloudflare",
+	"compatibility_date": "2026-10-19"
+}

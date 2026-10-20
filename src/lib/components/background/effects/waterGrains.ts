@@ -4,6 +4,7 @@
  * Manages the persistent "water grain" particles that drift across the background,
  * adding texture and a sense of subtle movement to the water surface.
  */
+import type { BackgroundSettings } from '../../../stores/backgroundSettingsStore';
 import type { WaterGrain } from '../types';
 import {
 	NUM_WATER_GRAINS,
@@ -14,7 +15,7 @@ import {
 	GRAIN_MIN_OPACITY,
 	GRAIN_MAX_OPACITY
 } from '../constants';
-import { addWaterGrain, getWaterGrains } from '../animationState';
+import { addWaterGrain, getWaterGrains, releaseWaterGrain } from '../animationState';
 
 /**
  * Creates the initial set of water grain particles based on settings.
@@ -26,7 +27,11 @@ import { addWaterGrain, getWaterGrains } from '../animationState';
  * @param canvasHeight - The initial height of the canvas.
  * @param settings - The background settings containing grain parameters.
  */
-export function initializeWaterGrains(canvasWidth: number, canvasHeight: number, settings?: any): void {
+export function initializeWaterGrains(
+	canvasWidth: number,
+	canvasHeight: number,
+	settings?: BackgroundSettings
+): void {
 	// Prevent re-initialization if grains already exist.
 	if (getWaterGrains().length > 0) {
 		console.warn('Attempted to re-initialize water grains. Skipping.');
@@ -85,15 +90,15 @@ export function updateAndDrawWaterGrains(
 	ctx: CanvasRenderingContext2D,
 	canvasWidth: number,
 	canvasHeight: number,
-	settings?: any
+	settings?: BackgroundSettings
 ): void {
 	const currentWaterGrains: WaterGrain[] = getWaterGrains();
-	
+
 	// Handle dynamic density changes
 	if (settings?.grainDensity) {
 		const targetCount = settings.grainDensity;
 		const currentCount = currentWaterGrains.length;
-		
+
 		if (currentCount < targetCount) {
 			// Add more grains
 			const grainsToAdd = targetCount - currentCount;
@@ -104,7 +109,7 @@ export function updateAndDrawWaterGrains(
 				const grainLightness = baseLightness + Math.random() * 10 - 5; // ±5 variation
 				const initialX = Math.random() * canvasWidth;
 				const initialY = Math.random() * canvasHeight;
-				
+
 				addWaterGrain({
 					x: initialX,
 					y: initialY,
@@ -126,7 +131,7 @@ export function updateAndDrawWaterGrains(
 			}
 		}
 	}
-	
+
 	if (currentWaterGrains.length === 0) return; // Exit if no grains exist.
 
 	const originalGlobalAlpha = ctx.globalAlpha; // Save current alpha.
@@ -134,8 +139,8 @@ export function updateAndDrawWaterGrains(
 	// Update and draw each grain.
 	for (const grain of currentWaterGrains) {
 		// Apply dynamic speed multiplier from settings
-		const speedMultiplier = settings ? (settings.grainSpeed / 0.15) : 1; // 0.15 is middle of range
-		
+		const speedMultiplier = settings ? settings.grainSpeed / 0.15 : 1; // 0.15 is middle of range
+
 		// Update position with dynamic speed.
 		grain.x += grain.vx * speedMultiplier;
 		grain.y += grain.vy * speedMultiplier;
@@ -156,7 +161,7 @@ export function updateAndDrawWaterGrains(
 		// Use dynamic size from settings if available
 		const renderSize = settings ? settings.grainSize : grain.size;
 		ctx.arc(grain.x, grain.y, renderSize, 0, Math.PI * 2);
-		
+
 		// Use dynamic color with lightness from settings if available
 		if (settings?.grainLightness) {
 			const baseLightness = settings.grainLightness;
@@ -166,7 +171,7 @@ export function updateAndDrawWaterGrains(
 		} else {
 			ctx.fillStyle = grain.color;
 		}
-		
+
 		// Use dynamic opacity from settings if available
 		const renderOpacity = settings ? settings.grainOpacity : grain.opacity;
 		ctx.globalAlpha = Math.max(0, renderOpacity * originalGlobalAlpha);

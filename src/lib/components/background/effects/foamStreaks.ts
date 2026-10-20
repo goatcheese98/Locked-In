@@ -1,3 +1,4 @@
+import type { BackgroundSettings } from '../../../stores/backgroundSettingsStore';
 /**
  * foamStreaks.ts
  *
@@ -52,7 +53,11 @@ import {
  * @param canvasWidth - The current width of the canvas.
  * @param canvasHeight - The current height of the canvas.
  */
-export function createFoamStreak(canvasWidth: number, canvasHeight: number, settings?: any): void {
+export function createFoamStreak(
+	canvasWidth: number,
+	canvasHeight: number,
+	settings?: BackgroundSettings
+): void {
 	if (getFoamStreaks().length >= MAX_FOAM_STREAKS) return;
 
 	const startSide = Math.floor(Math.random() * 3); // 0: Top, 1: Left, 2: Right
@@ -207,17 +212,18 @@ export function createFoamStreak(canvasWidth: number, canvasHeight: number, sett
 	const complexityMultiplier = settings?.foamComplexity ? settings.foamComplexity / 50 : 1; // 50 is default complexity
 	const minSegments = Math.round(FOAM_STREAK_MAIN_PATH_SEGMENTS_MIN * complexityMultiplier);
 	const maxSegments = Math.round(FOAM_STREAK_MAIN_PATH_SEGMENTS_MAX * complexityMultiplier);
-	const mainPathSegments = minSegments + Math.floor(Math.random() * (maxSegments - minSegments + 1));
+	const mainPathSegments =
+		minSegments + Math.floor(Math.random() * (maxSegments - minSegments + 1));
 	// Note: generatePathParticles is now called after the streak is added below
 
 	// Create the streak object itself (particles array is initially empty)
 	// Adjust lifetime inversely to animation speed - slower streaks live longer
-	const baseMaxAge = settings?.foamLifetime || (
+	const baseMaxAge =
+		settings?.foamLifetime ||
 		FOAM_STREAK_LIFESPAN_MIN +
-		Math.random() * (FOAM_STREAK_LIFESPAN_MAX - FOAM_STREAK_LIFESPAN_MIN)
-	);
+			Math.random() * (FOAM_STREAK_LIFESPAN_MAX - FOAM_STREAK_LIFESPAN_MIN);
 	const adjustedMaxAge = Math.round(baseMaxAge / speedMultiplier);
-	
+
 	const newStreakProps = {
 		anchorX: initialAnchorX,
 		anchorY: initialAnchorY,
@@ -266,7 +272,7 @@ export function updateAndDrawFoamStreaks(
 	ctx: CanvasRenderingContext2D,
 	canvasWidth: number,
 	canvasHeight: number,
-	settings?: any
+	settings?: BackgroundSettings
 ): void {
 	const currentFoamStreaks: FoamStreak[] = getFoamStreaks();
 	if (currentFoamStreaks.length === 0) return;

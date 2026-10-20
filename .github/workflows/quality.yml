@@ -1,0 +1,30 @@
+name: Focus timer quality
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: focus-quality-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - run: npm run check
+      - run: npm run lint
+      - run: npm test
+      - run: npm run test:e2e
+      - run: npm run build:cloudflare
+      - run: npm run test:cloudflare
+        env:
+          WRANGLER_SEND_METRICS: false
+      - run: npm run build

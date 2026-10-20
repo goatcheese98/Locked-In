@@ -1,3 +1,4 @@
+import type { BackgroundSettings } from '../../../stores/backgroundSettingsStore';
 /**
  * ripples.ts
  *
@@ -21,7 +22,12 @@ import type { Ripple, RippleType } from '../types';
  * @param settings - Optional settings to override default ripple parameters.
  * @throws Error if an unknown ripple type is provided.
  */
-export function createRipple(x: number, y: number, type: RippleType, settings?: any): void {
+export function createRipple(
+	x: number,
+	y: number,
+	type: RippleType,
+	settings?: BackgroundSettings
+): void {
 	const config = RIPPLE_CONFIG[type];
 	if (!config) {
 		// Defensive coding: ensure a configuration exists for the given type.
@@ -32,13 +38,13 @@ export function createRipple(x: number, y: number, type: RippleType, settings?: 
 	// Use dynamic settings if provided, otherwise fall back to config defaults
 	let baseSpeed = config.speed;
 	let baseMaxRadius = config.maxRadius;
-	
+
 	// Apply settings overrides for mouse move ripples
 	if (type === 'mouseMove' && settings) {
 		baseSpeed = settings.rippleSpeed || config.speed;
 		baseMaxRadius = settings.rippleSize || config.maxRadius;
 	}
-	
+
 	let rippleSpeed = baseSpeed;
 	let rippleMaxRadius = baseMaxRadius;
 
