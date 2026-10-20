@@ -25,3 +25,6 @@ vite.config.ts.timestamp-*
 /work/
 /test-results/
 /playwright-report/
+
+/.dev.vars
+/.dev.vars.*
